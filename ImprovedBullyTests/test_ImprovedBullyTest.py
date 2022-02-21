@@ -27,6 +27,21 @@ class MyTestCase(unittest.TestCase):
         print(p3.whoseLeader)
         print(p4.whoseLeader)
 
+    def starterNodeIsHighest_becomesLeader(self):
+        pass
+    def starterNodeIsLowest_highestBecomeLeader(self):
+        pass
+
+    def highestNodeIsDead_secondHighestBecomeLeader(self):
+        pass
+
+    def aNodeIsDead_DoesNotLearnLeader(self):
+        pass
+    def allNodesExceptOneIsDead_OneBecomesLeader(self):
+        pass
+    def onlyNodesLowerAreAlive_StarterBecomesLeader(self):
+        pass
+
 
 
 
