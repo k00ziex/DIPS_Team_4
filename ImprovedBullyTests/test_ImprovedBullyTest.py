@@ -49,11 +49,11 @@ class TestCases(unittest.TestCase):
 
         p3.startElection()
 
-        self.assertTrue(p1.whoseLeader == p3.id)
-        self.assertTrue(p2.whoseLeader == p3.id)
-        self.assertTrue(p3.whoseLeader == p3.id)
-        self.assertTrue(p4.whoseLeader == p3.id)
-        self.assertTrue(p5.whoseLeader == p3.id)
+        self.assertEqual(p1.whoseLeader, p3.id)
+        self.assertEqual(p2.whoseLeader, p3.id)
+        self.assertEqual(p3.whoseLeader, p3.id)
+        self.assertEqual(p4.whoseLeader, p3.id)
+        self.assertEqual(p5.whoseLeader, p3.id)
 
     def test_starterNodeIsLowest_highestBecomeLeader(self):
         ListOfP = []
@@ -77,11 +77,11 @@ class TestCases(unittest.TestCase):
 
         p4.startElection()
 
-        self.assertTrue(p1.whoseLeader == p2.id)
-        self.assertTrue(p2.whoseLeader == p2.id)
-        self.assertTrue(p3.whoseLeader == p2.id)
-        self.assertTrue(p4.whoseLeader == p2.id)
-        self.assertTrue(p5.whoseLeader == p2.id)
+        self.assertEqual(p1.whoseLeader, p2.id)
+        self.assertEqual(p2.whoseLeader, p2.id)
+        self.assertEqual(p3.whoseLeader, p2.id)
+        self.assertEqual(p4.whoseLeader, p2.id)
+        self.assertEqual(p5.whoseLeader, p2.id)
 
     def test_highestNodeIsDead_secondHighestBecomeLeader(self):
         ListOfP = []
@@ -107,10 +107,10 @@ class TestCases(unittest.TestCase):
 
         p4.startElection()
 
-        self.assertTrue(p1.whoseLeader == p5.id)
-        self.assertTrue(p3.whoseLeader == p5.id)
-        self.assertTrue(p4.whoseLeader == p5.id)
-        self.assertTrue(p5.whoseLeader == p5.id)
+        self.assertEqual(p1.whoseLeader, p5.id)
+        self.assertEqual(p3.whoseLeader, p5.id)
+        self.assertEqual(p4.whoseLeader, p5.id)
+        self.assertEqual(p5.whoseLeader, p5.id)
 
     def test_aNodeIsDead_DoesNotLearnLeader(self):
         ListOfP = []
