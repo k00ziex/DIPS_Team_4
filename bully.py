@@ -5,6 +5,7 @@ class Messages(Enum):
     Election = 1
     Answer = 2
     Coordinator = 3
+    Timeout = 4
 
 
 class BullyAlgo:
