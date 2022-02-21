@@ -1,5 +1,6 @@
 from enum import Enum
 import copy
+import operator
 
 class ImprovedBullyProcess:
     id = int
@@ -39,6 +40,7 @@ class ImprovedBullyProcess:
             if self.id < process.id:
                 self.whoseLeader = process.id
             else:
+                print(f"Self: {self.id}, Process: {process.id}")
                 raise Exception("Sort Failed!")
             return Messages.Answer
         elif message == Messages.Timeout:
@@ -52,7 +54,7 @@ class ImprovedBullyProcess:
     def startElection(self):
         # Get ids higher than self in descending order
         higherids = [x for x in self.neighbors if x.id > self.id]
-        higherids.sort(key=id, reverse=False)
+        higherids.sort(key=operator.attrgetter("id"), reverse=True)
 
         # Assume self to be leader
         self.whoseLeader = self.id
@@ -76,9 +78,6 @@ class ImprovedBullyProcess:
         if noAnswer:
             for p in self.neighbors:
                 self.sendMessage(Messages.Coordinator, p)
-
-
-
 
     def killNode(self):
         self.isAlive = False
