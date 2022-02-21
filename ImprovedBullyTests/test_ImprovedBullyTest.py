@@ -112,9 +112,6 @@ class TestCases(unittest.TestCase):
         self.assertTrue(p4.whoseLeader == p5.id)
         self.assertTrue(p5.whoseLeader == p5.id)
 
-    def test_highestNodeIsDead_secondHighestBecomeLeader(self):
-        pass
-
     def test_aNodeIsDead_DoesNotLearnLeader(self):
         ListOfP = []
 
