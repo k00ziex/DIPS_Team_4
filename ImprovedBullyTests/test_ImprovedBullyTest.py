@@ -1,8 +1,8 @@
 import unittest
 from ImprovedBullyProcess import ImprovedBullyProcess
 
-class MyTestCase(unittest.TestCase):
-    def test_something(self):
+class TestCases(unittest.TestCase):
+    def test_manualtesting(self):
 
         ListOfP = []
 
@@ -27,21 +27,90 @@ class MyTestCase(unittest.TestCase):
         print(p3.whoseLeader)
         print(p4.whoseLeader)
 
-    def starterNodeIsHighest_becomesLeader(self):
+    def test_starterNodeIsHighest_becomesLeader(self):
         pass
-    def starterNodeIsLowest_highestBecomeLeader(self):
+        
+        
+
+    def test_starterNodeIsLowest_highestBecomeLeader(self):
         pass
 
-    def highestNodeIsDead_secondHighestBecomeLeader(self):
+    def test_highestNodeIsDead_secondHighestBecomeLeader(self):
         pass
 
-    def aNodeIsDead_DoesNotLearnLeader(self):
-        pass
-    def allNodesExceptOneIsDead_OneBecomesLeader(self):
-        pass
-    def onlyNodesLowerAreAlive_StarterBecomesLeader(self):
-        pass
+    def test_aNodeIsDead_DoesNotLearnLeader(self):
+        ListOfP = []
 
+        p1 = ImprovedBullyProcess(4536456)
+        ListOfP.append(p1)
+        p2 = ImprovedBullyProcess(124)
+        ListOfP.append(p2)
+        p3 = ImprovedBullyProcess(3457568567)
+        ListOfP.append(p3)
+        p4 = ImprovedBullyProcess(14)
+        ListOfP.append(p4)
+
+        p1.setNeighbors(ListOfP)
+        p2.setNeighbors(ListOfP)
+        p3.setNeighbors(ListOfP)
+        p4.setNeighbors(ListOfP)
+        p2.killNode()
+
+        p4.startElection()
+
+        self.assertEqual(p2.whoseLeader, int)
+
+
+    def test_allNodesExceptOneIsDead_OneBecomesLeader(self):
+        ListOfP = []
+
+        p1 = ImprovedBullyProcess(4536456)
+        ListOfP.append(p1)
+        p2 = ImprovedBullyProcess(124)
+        ListOfP.append(p2)
+        p3 = ImprovedBullyProcess(3457568567)
+        ListOfP.append(p3)
+        p4 = ImprovedBullyProcess(14)
+        ListOfP.append(p4)
+
+        p1.setNeighbors(ListOfP)
+        p2.setNeighbors(ListOfP)
+        p3.setNeighbors(ListOfP)
+        p4.setNeighbors(ListOfP)
+
+        p1.killNode()
+        p3.killNode()
+        p4.killNode()
+        p2.startElection()
+
+        self.assertEqual(p2.whoseLeader, 124)
+    
+    def test_onlyNodesLowerAreAlive_StarterBecomesLeader(self):
+        ListOfP = []
+
+        p1 = ImprovedBullyProcess(10)
+        ListOfP.append(p1)
+        p2 = ImprovedBullyProcess(9)
+        ListOfP.append(p2)
+        p3 = ImprovedBullyProcess(4)
+        ListOfP.append(p3)
+        p4 = ImprovedBullyProcess(1)
+        ListOfP.append(p4)
+
+        p1.setNeighbors(ListOfP)
+        p2.setNeighbors(ListOfP)
+        p3.setNeighbors(ListOfP)
+        p4.setNeighbors(ListOfP)
+
+        p1.killNode()
+
+        p2.startElection()
+
+        self.assertEqual(p2.whoseLeader, 9)
+        self.assertEqual(p3.whoseLeader, 9)
+        self.assertEqual(p4.whoseLeader, 9)
+
+        self.assertEqual(p1.whoseLeader, int) # Not set
 
 
 
