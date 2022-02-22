@@ -15,7 +15,6 @@ class ImprovedBullyProcess:
         self.isAlive = True
         self.id = id
         self.messages = []
-        # Initial leader is missing keep in mind
 
     def setNeighbors(self, list_neighbors):
         self.neighbors = [x for x in list_neighbors if x.id != self.id]
@@ -34,8 +33,10 @@ class ImprovedBullyProcess:
                 return Messages.Answer
             else:
                 raise Exception("Sort Failed!")
+
         elif message == Messages.Answer:
             return Messages.Answer
+
         elif message == Messages.Coordinator:
             if self.id < process.id:
                 self.whoseLeader = process.id
@@ -43,6 +44,7 @@ class ImprovedBullyProcess:
                 print(f"Self: {self.id}, Process: {process.id}")
                 raise Exception("Sort Failed!")
             return Messages.Answer
+
         elif message == Messages.Timeout:
             raise Exception("Timeout should not be \"sent\"")
         else:
