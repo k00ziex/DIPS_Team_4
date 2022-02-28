@@ -3,7 +3,7 @@ from OriginalBullyProcess import OriginalBullyProcess
 
 
 class MyTestCase(unittest.TestCase):
-    def test_something(self):
+    def test_4IsElected(self):
         node1 = OriginalBullyProcess(1)
         node2 = OriginalBullyProcess(2)
         node3 = OriginalBullyProcess(3)
@@ -15,41 +15,48 @@ class MyTestCase(unittest.TestCase):
             node.setOtherProcessIDs(nodeArray)
 
         node1.startElection()
-
-        print(node4.isLeader())
-        print(node3.isLeader())
-        print(node2.isLeader())
-        print(node1.isLeader())
 
         self.assertEqual(True, node4.isLeader())  # add assertion here
         self.assertEqual(False, node3.isLeader())  # add assertion here
         self.assertEqual(False, node2.isLeader())  # add assertion here
         self.assertEqual(False, node1.isLeader())  # add assertion here
 
-    def test_node4Killed(self):
+    def test_node2Killed_1isElected(self):
         node1 = OriginalBullyProcess(1)
         node2 = OriginalBullyProcess(2)
-        node3 = OriginalBullyProcess(3)
-        node4 = OriginalBullyProcess(4)
 
-        nodeArray = [node1, node2, node3, node4]
+        nodeArray = [node1, node2]
 
         for node in nodeArray:
             node.setOtherProcessIDs(nodeArray)
 
-        node4.killNode()
+        node2.killNode()
         node1.startElection()
 
-        print(node4.isLeader())
-        print(node3.isLeader())
         print(node2.isLeader())
         print(node1.isLeader())
 
-        self.assertEqual(False, node4.isLeader())  # add assertion here
-        self.assertEqual(True, node3.isLeader())  # add assertion here
         self.assertEqual(False, node2.isLeader())  # add assertion here
-        self.assertEqual(False, node1.isLeader())  # add assertion here
+        self.assertEqual(True, node1.isLeader())  # add assertion here
 
+    def test_node2KilledAndStarted_2isElected(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+
+        nodeArray = [node1, node2]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+
+        node2.killNode()
+        node1.startElection()
+        node2.startNode()
+
+        print(node2.isLeader())
+        print(node1.isLeader())
+
+        self.assertEqual(True, node2.isLeader())  # add assertion here
+        self.assertEqual(False, node1.isLeader())  # add assertion here
 
 
 
