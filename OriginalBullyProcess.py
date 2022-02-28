@@ -1,14 +1,9 @@
-from bully import Messages
+from bully import Messages, Process
 
-class OriginalBullyProcess:
+class OriginalBullyProcess(Process):
     isPossibleCandidate = bool
-    id = int
-    whoseLeader = int
-
-    neighbors = []
     higherNeighbors = []
     lowerNeighbors = []
-    isAlive = bool
 
     def __init__(self, id) -> None:
         self.isAlive = True
