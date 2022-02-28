@@ -2,54 +2,65 @@ import unittest
 from OriginalBullyProcess import OriginalBullyProcess
 
 
-class MyTestCase(unittest.TestCase):
-    def test_something(self):
-        node1 = OriginalBullyProcess(1)
-        node2 = OriginalBullyProcess(2)
-        node3 = OriginalBullyProcess(3)
-        node4 = OriginalBullyProcess(4)
+class Basic_Election(unittest.TestCase):
+    def test_4IsElected(self):
+        self.node1 = OriginalBullyProcess(1)
+        self.node2 = OriginalBullyProcess(2)
+        self.node3 = OriginalBullyProcess(3)
+        self.node4 = OriginalBullyProcess(4)
 
-        nodeArray = [node1, node2, node3, node4]
-
-        for node in nodeArray:
-            node.setOtherProcessIDs(nodeArray)
-
-        node1.startElection()
-
-        print(node4.isLeader())
-        print(node3.isLeader())
-        print(node2.isLeader())
-        print(node1.isLeader())
-
-        self.assertEqual(True, node4.isLeader())  # add assertion here
-        self.assertEqual(False, node3.isLeader())  # add assertion here
-        self.assertEqual(False, node2.isLeader())  # add assertion here
-        self.assertEqual(False, node1.isLeader())  # add assertion here
-
-    def test_node4Killed(self):
-        node1 = OriginalBullyProcess(1)
-        node2 = OriginalBullyProcess(2)
-        node3 = OriginalBullyProcess(3)
-        node4 = OriginalBullyProcess(4)
-
-        nodeArray = [node1, node2, node3, node4]
+        nodeArray = [self.node1, self.node2, self.node3, self.node4]
 
         for node in nodeArray:
             node.setOtherProcessIDs(nodeArray)
 
-        node4.killNode()
-        node1.startElection()
+        self.node1.startElection()
 
-        print(node4.isLeader())
-        print(node3.isLeader())
-        print(node2.isLeader())
-        print(node1.isLeader())
+        self.assertEqual(True, self.node4.isLeader())  # add assertion here
+        self.assertEqual(False, self.node3.isLeader())  # add assertion here
+        self.assertEqual(False, self.node2.isLeader())  # add assertion here
+        self.assertEqual(False, self.node1.isLeader())  # add assertion here
 
-        self.assertEqual(False, node4.isLeader())  # add assertion here
-        self.assertEqual(True, node3.isLeader())  # add assertion here
-        self.assertEqual(False, node2.isLeader())  # add assertion here
-        self.assertEqual(False, node1.isLeader())  # add assertion here
+class Singular_Node_Crash_Election(unittest.TestCase):
+    def test_node2Killed_1isElected(self):
+        self.node1 = OriginalBullyProcess(1)
+        self.node2 = OriginalBullyProcess(2)
 
+        self.nodeArray = [self.node1, self.node2]
+
+        for node in self.nodeArray:
+            node.setOtherProcessIDs(self.nodeArray)
+
+        self.node2.killNode()
+        self.node1.startElection()
+
+        #print(node2.isLeader())
+        #print(node1.isLeader())
+
+        self.assertEqual(False, self.node2.isLeader())  # add assertion here
+        self.assertEqual(True, self.node1.isLeader())  # add assertion here
+        
+
+class Killed_Node_Reboots_Election(unittest.TestCase):
+    def test_node2KilledAndStarted_2isElected(self):
+        
+        self.node1 = OriginalBullyProcess(1)
+        self.node2 = OriginalBullyProcess(2)
+
+        nodeArray = [self.node1, self.node2]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+
+        self.node2.killNode()
+        self.node1.startElection()
+        self.node2.startNode()
+
+        #print(node2.isLeader())
+        #print(node1.isLeader())
+
+        self.assertEqual(True, self.node2.isLeader())  # add assertion here
+        self.assertEqual(False, self.node1.isLeader())  # add assertion here
 
 
 

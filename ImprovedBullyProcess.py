@@ -1,20 +1,21 @@
 from enum import Enum
-import copy
 import operator
 
 class ImprovedBullyProcess:
     id = int
     whoseLeader = int
+    networkMessagesCounter = int
 
     neighbors = []
     messages = []
 
     isAlive = bool
 
-    def __init__(self, id):
+    def __init__(self, id, networkMessagesCounter):
         self.isAlive = True
         self.id = id
         self.messages = []
+        self.networkMessagesCounter = networkMessagesCounter
 
     def setNeighbors(self, list_neighbors):
         self.neighbors = [x for x in list_neighbors if x.id != self.id]
@@ -51,6 +52,7 @@ class ImprovedBullyProcess:
             raise Exception("YIKES, WHAT HAVE U DONE!!!!!")
 
     def sendMessage(self, message, process):
+        self.networkMessagesCounter[0] = self.networkMessagesCounter[0] + 1
         return process.receiveMessage(message, self)
 
     def startElection(self):

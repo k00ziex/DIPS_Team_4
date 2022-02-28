@@ -1,17 +1,15 @@
-from bully import Messages
+from bully import Messages, Process
 
-class OriginalBullyProcess:
+class OriginalBullyProcess(Process):
     isPossibleCandidate = bool
-    id = int
-    whoseLeader = int
-
-    neighbors = []
-    isAlive = bool
+    higherNeighbors = []
+    lowerNeighbors = []
 
     def __init__(self, id) -> None:
         self.isAlive = True
         self.isPossibleCandidate = False
         self.id = id
+        self.whoseLeader = -999 # Default value so we can see if someone doesn't have its leader elected
 
 
     def receiveMessage(self, message, senderId):
@@ -21,13 +19,11 @@ class OriginalBullyProcess:
                     # Send coordinator message if we are the highest ID
                     for process in self.neighbors:
                         self.whoseLeader = self.id
-                        process.sendMessage(Messages.Coordinator, process.id)
+                        self.sendMessage(Messages.Coordinator, process.id) ## Process.sendMessage might be wrong
                 else:
                     for process in self.neighbors:
                         if(process.id == senderId):
-                            self.sendMessage(Messages.Answer, process.id)
-                            self.startElection()
-                        
+                            self.sendMessage(Messages.Answer, process.id)                        
                             
             elif(message == Messages.Coordinator):
                 self.whoseLeader = senderId
@@ -37,7 +33,13 @@ class OriginalBullyProcess:
                 self.isPossibleCandidate = False
 
             elif(message == Messages.Timeout):
-                pass
+                self.higherNeighbors.remove(senderId)
+                
+                if(len(self.higherNeighbors) <= 0):
+                    self.whoseLeader = self.id
+                    for neighbor in self.lowerNeighbors:
+                        self.sendMessage(Messages.Coordinator, neighbor.id)
+
             else:
                 raise Exception("RECEIVEMESSAGE() EXCEPTION! PANIC!!!")
         else:
@@ -58,16 +60,34 @@ class OriginalBullyProcess:
 
     def startElection(self):
         self.isPossibleCandidate = True
-        for process in self.neighbors:
-            if(process.id > self.id):
-                self.sendMessage(Messages.Election, process.id)
+        self.splitNeighbors()
 
+        if(len(self.higherNeighbors) > 0):
+            for processId in self.higherNeighbors:
+                self.sendMessage(Messages.Election, processId)
+        else: # If we have no higher neighbors, we elect ourself as leader
+            for processId in self.lowerNeighbors:
+                self.whoseLeader = self.id
+                self.sendMessage(Messages.Coordinator, processId)
+
+    def electSelf(self):
+        self.whoseLeader = self.id
+        for process in self.neighbors:
+            self.sendMessage(Messages.Coordinator, process.id)
+            
+    def splitNeighbors(self):
+        for neighbor in self.neighbors:
+            if(neighbor.id > self.id):
+                self.higherNeighbors.append(neighbor.id)
+            elif(neighbor.id < self.id):
+                self.lowerNeighbors.append(neighbor.id)
 
     def killNode(self):
         self.isAlive = False
 
     def startNode(self):
         self.isAlive = True
+        self.startElection()
 
     def isLeader(self):
         return self.id == self.whoseLeader
