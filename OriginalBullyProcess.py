@@ -67,9 +67,19 @@ class OriginalBullyProcess:
         self.isPossibleCandidate = True
         self.splitNeighbors()
 
-        for processId in self.higherNeighbors:
-            self.sendMessage(Messages.Election, processId)
+        if(len(self.higherNeighbors) > 0):
+            for processId in self.higherNeighbors:
+                self.sendMessage(Messages.Election, processId)
+        else: # If we have no higher neighbors, we elect ourself as leader
+            for processId in self.lowerNeighbors:
+                self.whoseLeader = self.id
+                self.sendMessage(Messages.Coordinator, processId)
 
+    def electSelf(self):
+        self.whoseLeader = self.id
+        for process in self.neighbors:
+            self.sendMessage(Messages.Coordinator, process.id)
+            
     def splitNeighbors(self):
         for neighbor in self.neighbors:
             if(neighbor.id > self.id):
@@ -82,6 +92,7 @@ class OriginalBullyProcess:
 
     def startNode(self):
         self.isAlive = True
+        self.startElection()
 
     def isLeader(self):
         return self.id == self.whoseLeader
