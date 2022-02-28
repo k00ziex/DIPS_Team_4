@@ -26,24 +26,24 @@ class ImprovedBullyProcess:
 
         if message == Messages.Election:
             if self.id > process.id:
-                self.sendMessage(Messages.Answer, process)
+                self.sendMessage(Messages.ACK, process)
                 self.whoseLeader = self.id
                 for p in self.neighbors:
                     self.sendMessage(Messages.Coordinator, p)
-                return Messages.Answer
+                return Messages.ACK
             else:
                 raise Exception("Sort Failed!")
 
-        elif message == Messages.Answer:
-            return Messages.Answer
+        elif message == Messages.ACK:
+            return Messages.ACK
 
         elif message == Messages.Coordinator:
             if self.id < process.id:
                 self.whoseLeader = process.id
             else:
                 print(f"Self: {self.id}, Process: {process.id}")
-                raise Exception("Sort Failed!")
-            return Messages.Answer
+                raise Exception("Actually i should be the boss! This situation happens if high ID node dies and comes back live!")
+            return Messages.ACK
 
         elif message == Messages.Timeout:
             raise Exception("Timeout should not be \"sent\"")
@@ -93,6 +93,6 @@ class ImprovedBullyProcess:
 
 class Messages(Enum):
     Election = 1
-    Answer = 2
+    ACK = 2
     Coordinator = 3
     Timeout = 4
