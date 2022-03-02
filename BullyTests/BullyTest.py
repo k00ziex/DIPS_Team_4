@@ -46,18 +46,18 @@ class Killed_Node_Reboots_Election(unittest.TestCase):
         
         self.node1 = OriginalBullyProcess(1)
         self.node2 = OriginalBullyProcess(2)
+        self.node3 = OriginalBullyProcess(3)
 
-        nodeArray = [self.node1, self.node2]
+        nodeArray = [self.node1, self.node2, self.node3]
 
         for node in nodeArray:
             node.setOtherProcessIDs(nodeArray)
 
-        self.node2.killNode()
+        self.node3.killNode()
         self.node1.startElection()
-        self.node2.startNode()
 
-        #print(node2.isLeader())
-        #print(node1.isLeader())
+        print(self.node2.whoseLeader)
+        print(self.node1.whoseLeader)
 
         self.assertEqual(True, self.node2.isLeader())  # add assertion here
         self.assertEqual(False, self.node1.isLeader())  # add assertion here

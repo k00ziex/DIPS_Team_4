@@ -3,6 +3,7 @@ from bully import Messages, Process
 class OriginalBullyProcess(Process):
     isPossibleCandidate = bool
     higherNeighbors = []
+    allHigherNeighbors = []
     lowerNeighbors = []
 
     def __init__(self, id) -> None:
