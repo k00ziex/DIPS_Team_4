@@ -10,7 +10,6 @@ class OriginalBullyProcess(Process):
         self.isAlive = True
         self.isPossibleCandidate = False
         self.id = id
-        self.whoseLeader = -999 # Default value so we can see if someone doesn't have its leader elected
 
 
     def receiveMessage(self, message, senderId):
@@ -36,7 +35,8 @@ class OriginalBullyProcess(Process):
                 self.isPossibleCandidate = False
 
             elif(message == Messages.Timeout):
-                self.nonTimedOutHigherNeighbors.remove(senderId)
+                if(self.nonTimedOutHigherNeighbors.count(senderId) > 0):
+                    self.nonTimedOutHigherNeighbors.remove(senderId)
                 
                 if(len(self.nonTimedOutHigherNeighbors) <= 0): # If all our higher neighbors are timed out, we are the leader
                     self.whoseLeader = self.id
