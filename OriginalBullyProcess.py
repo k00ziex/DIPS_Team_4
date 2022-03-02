@@ -20,7 +20,7 @@ class OriginalBullyProcess(Process):
                     # Send coordinator message if we are the highest ID
                     for process in self.neighbors:
                         self.whoseLeader = self.id
-                        self.sendMessage(Messages.Coordinator, process.id) ## Process.sendMessage might be wrong
+                        self.sendMessage(Messages.Coordinator, process.id)
                 else:
                     for process in self.neighbors:
                         if(process.id == senderId):
@@ -40,7 +40,7 @@ class OriginalBullyProcess(Process):
                 
                 if(len(self.nonTimedOutHigherNeighbors) <= 0): # If all our higher neighbors are timed out, we are the leader
                     self.whoseLeader = self.id
-                    for neighborId in self.lowerNeighbors: # This needs to be
+                    for neighborId in self.lowerNeighbors:
                         self.sendMessage(Messages.Coordinator, neighborId)
 
             else:
