@@ -2,7 +2,7 @@ import unittest
 from OriginalBullyProcess import OriginalBullyProcess
 
 
-class Basic_Election(unittest.TestCase):
+class SystemTest(unittest.TestCase):
     def test_HighestElectedLeader_When_LowestStartsElection(self):
         node1 = OriginalBullyProcess(1)
         node2 = OriginalBullyProcess(2)
@@ -92,7 +92,6 @@ class Basic_Election(unittest.TestCase):
         
 
     def test_Node2Then3Elected_When_Node3KilledAndStarted(self):
-        
         node1 = OriginalBullyProcess(1)
         node2 = OriginalBullyProcess(2)
         node3 = OriginalBullyProcess(3)
@@ -117,8 +116,8 @@ class Basic_Election(unittest.TestCase):
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
 
+
     def test_NodeDoesNotLearnLeader_When_NodeIsDead(self):
-        
         node1 = OriginalBullyProcess(1)
         node2 = OriginalBullyProcess(2)
         node3 = OriginalBullyProcess(3)
@@ -136,6 +135,7 @@ class Basic_Election(unittest.TestCase):
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
         self.assertEqual(int, node2.whoseLeader) # Default value of int
+
 
     def test_LowestBecomesLeader_When_AllOthersDead(self):
         node1 = OriginalBullyProcess(1)
@@ -161,6 +161,7 @@ class Basic_Election(unittest.TestCase):
         self.assertEqual(False, node3.isLeader())
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(True, node1.isLeader())
+
 
     def test_HighestElected_When_LowestKilledAndStarted(self):
         node1 = OriginalBullyProcess(1)
@@ -192,6 +193,69 @@ class Basic_Election(unittest.TestCase):
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
         self.assertEqual(node5.id, node1.whoseLeader) # Assert that node1 gets correct leader
+
+class UnitTest(unittest.TestCase):
+    def test_AllNeighborsSet(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        neighborArray = [node1, node2, node3, node4, node5]
+        expectedNeighbors = [node5, node4, node2, node1] # The list gets sorted from high-to-low when setting neighbors
+
+        node3.setOtherProcessIDs(neighborArray)
+
+        self.assertEqual(expectedNeighbors, node3.neighbors)
+
+
+    def test_IsAliveReturnsTrue_When_NodeIsAlive(self):
+        node1 = OriginalBullyProcess(1)
+        self.assertEqual(True, node1.isAlive)
+      
+
+    def test_IsAliveReturnsFalse_When_NodeIsKilled(self):
+        node1 = OriginalBullyProcess(1)
+        node1.killNode()
+        self.assertEqual(False, node1.isAlive)
+
+
+    def test_whoseLeaderReturnsInt_When_NoLeaderSelected(self):
+        node1 = OriginalBullyProcess(1)
+        self.assertEqual(int, node1.whoseLeader)
+
+
+    def test_isLeaderReturnsFalse_When_NoLeaderSelected(self):
+        node1 = OriginalBullyProcess(1)
+        self.assertEqual(False, node1.isLeader())
+
+
+    def test_nodeGetsElected_When_NodeStartsAfterKilled(self):
+        node1 = OriginalBullyProcess(1)
+        node1.killNode()
+        node1.startNode()
+
+        self.assertEqual(True, node1.isLeader())
+
+
+    def test_HigherAndLowerNeighborsSet_When_SplitNeighborsCalled(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        node3.setOtherProcessIDs([node1, node2, node3, node4, node5])
+
+        node3.splitNeighbors()
+
+        self.assertEqual([node5.id, node4.id], node3.allHigherNeighbors)
+        self.assertEqual([node5.id, node4.id], node3.nonTimedOutHigherNeighbors)
+        self.assertEqual([node2.id, node1.id], node3.lowerNeighbors)
+
+
+
 
 
 if __name__ == '__main__':
