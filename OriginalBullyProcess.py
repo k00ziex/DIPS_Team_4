@@ -61,7 +61,7 @@ class OriginalBullyProcess(Process):
             if(process.id == receiverId):
                 process.receiveMessage(message, self.id)
                 # Count up the total number of messages sent
-                self.messagesSent[0] = self.messagesSent[0] + 1
+                if(message != Messages.Timeout): self.messagesSent[0] = self.messagesSent[0] + 1
 
 
     def setOtherProcessIDs(self, processList):
