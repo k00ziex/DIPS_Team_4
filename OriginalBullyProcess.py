@@ -5,20 +5,18 @@ class OriginalBullyProcess(Process):
     nonTimedOutHigherNeighbors = []
     allHigherNeighbors = []
     lowerNeighbors = []
-    messagesSent = int
-    messagesReceived = int
+    messagesSent = []
 
 
-    def __init__(self, id) -> None:
+    def __init__(self, id, messagesSent) -> None:
         self.isAlive = True
         self.isPossibleCandidate = False
         self.id = id
         self.messagesSent = 0
-        self.messagesReceived = 0
+        self.messagesSent = messagesSent
 
 
     def receiveMessage(self, message, senderId):
-        self.messagesReceived = self.messagesReceived + 1
         if(self.isAlive == True):
             if(message == Messages.Election):
                 if(self.id > self.neighbors[0].id): # TODO: Write a comment here as to why we index
@@ -63,7 +61,7 @@ class OriginalBullyProcess(Process):
             if(process.id == receiverId):
                 process.receiveMessage(message, self.id)
                 # Count up the total number of messages sent
-                self.messagesSent = self.messagesSent + 1
+                self.messagesSent[0] = self.messagesSent[0] + 1
 
 
     def setOtherProcessIDs(self, processList):
