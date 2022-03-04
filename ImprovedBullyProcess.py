@@ -21,10 +21,11 @@ class ImprovedBullyProcess:
         self.neighbors = [x for x in list_neighbors if x.id != self.id]
 
     def receiveMessage(self, message, process):
-
+        # Simulate timeout
         if not self.isAlive:
             return Messages.Timeout
 
+        # If i receive an election and my ID is higher, I wil be the coordinator. 
         if message == Messages.Election:
             if self.id > process.id:
                 self.sendMessage(Messages.ACK, process)
@@ -33,15 +34,18 @@ class ImprovedBullyProcess:
                     self.sendMessage(Messages.Coordinator, p)
                 return Messages.ACK
             else:
+                # For testing purposes
                 raise Exception("Sort Failed!")
 
         elif message == Messages.ACK:
             return Messages.ACK
 
+        # If receive Coordinator message, accept leader.
         elif message == Messages.Coordinator:
             if self.id < process.id:
                 self.whoseLeader = process.id
             else:
+                # For testing purposes
                 print(f"Self: {self.id}, Process: {process.id}")
                 raise Exception("Actually i should be the boss! This situation happens if high ID node dies and comes back live!")
             return Messages.ACK
