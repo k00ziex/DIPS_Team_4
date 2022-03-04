@@ -2,65 +2,259 @@ import unittest
 from OriginalBullyProcess import OriginalBullyProcess
 
 
-class Basic_Election(unittest.TestCase):
-    def test_4IsElected(self):
-        self.node1 = OriginalBullyProcess(1)
-        self.node2 = OriginalBullyProcess(2)
-        self.node3 = OriginalBullyProcess(3)
-        self.node4 = OriginalBullyProcess(4)
+class SystemTest(unittest.TestCase):
+    def test_HighestElectedLeader_When_LowestStartsElection(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
 
-        nodeArray = [self.node1, self.node2, self.node3, self.node4]
-
-        for node in nodeArray:
-            node.setOtherProcessIDs(nodeArray)
-
-        self.node1.startElection()
-
-        self.assertEqual(True, self.node4.isLeader())  # add assertion here
-        self.assertEqual(False, self.node3.isLeader())  # add assertion here
-        self.assertEqual(False, self.node2.isLeader())  # add assertion here
-        self.assertEqual(False, self.node1.isLeader())  # add assertion here
-
-class Singular_Node_Crash_Election(unittest.TestCase):
-    def test_node2Killed_1isElected(self):
-        self.node1 = OriginalBullyProcess(1)
-        self.node2 = OriginalBullyProcess(2)
-
-        self.nodeArray = [self.node1, self.node2]
-
-        for node in self.nodeArray:
-            node.setOtherProcessIDs(self.nodeArray)
-
-        self.node2.killNode()
-        self.node1.startElection()
-
-        #print(node2.isLeader())
-        #print(node1.isLeader())
-
-        self.assertEqual(False, self.node2.isLeader())  # add assertion here
-        self.assertEqual(True, self.node1.isLeader())  # add assertion here
-        
-
-class Killed_Node_Reboots_Election(unittest.TestCase):
-    def test_node2KilledAndStarted_2isElected(self):
-        
-        self.node1 = OriginalBullyProcess(1)
-        self.node2 = OriginalBullyProcess(2)
-
-        nodeArray = [self.node1, self.node2]
+        nodeArray = [node1, node2, node3, node4, node5]
 
         for node in nodeArray:
             node.setOtherProcessIDs(nodeArray)
 
-        self.node2.killNode()
-        self.node1.startElection()
-        self.node2.startNode()
+        node1.startElection()
 
-        #print(node2.isLeader())
-        #print(node1.isLeader())
+        self.assertEqual(True, node5.isLeader())
+        self.assertEqual(False, node4.isLeader())
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
 
-        self.assertEqual(True, self.node2.isLeader())  # add assertion here
-        self.assertEqual(False, self.node1.isLeader())  # add assertion here
+
+    def test_HighestElectedLeader_When_HighestStartElection(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        nodeArray = [node1, node2, node3, node4, node5]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+
+        node5.startElection()
+
+        self.assertEqual(True, node5.isLeader())
+        self.assertEqual(False, node4.isLeader())
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+
+
+    def test_HighestElectedLeader_When_MiddleStartsElection(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        nodeArray = [node1, node2, node3, node4, node5]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+
+        node3.startElection()
+
+        self.assertEqual(True, node5.isLeader())
+        self.assertEqual(False, node4.isLeader())
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+
+
+    def test_SecondHighestElected_When_HighestIsDead(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+
+        nodeArray = [node1, node2, node3]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+
+        node3.killNode()
+
+        # Assert that second highest node is elected when lowest starts election
+        node1.startElection()
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(True, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+
+        # Assert that second highest node is elected when second highest starts election
+        node2.startElection()
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(True, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+        
+
+    def test_Node2Then3Elected_When_Node3KilledAndStarted(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+
+        nodeArray = [node1, node2, node3]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+
+        node3.killNode()
+        node1.startElection()
+
+        # Assert node 2 being elected while 3 is dead
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(True, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+
+        node3.startNode()
+        
+        # Assert that node 3 takes leadership when it starts back up
+        self.assertEqual(True, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+
+
+    def test_NodeDoesNotLearnLeader_When_NodeIsDead(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+
+        nodeArray = [node1, node2, node3]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+
+        node2.killNode()
+        node1.startElection()
+        
+        # Assert that highest is leader and that the killed node does not know leader
+        self.assertEqual(True, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+        self.assertEqual(int, node2.whoseLeader) # Default value of int
+
+
+    def test_LowestBecomesLeader_When_AllOthersDead(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        nodeArray = [node1, node2, node3, node4, node5]
+        nodesToKill = [node2, node3, node4, node5]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+        
+        for nodeKill in nodesToKill:
+            nodeKill.killNode()
+
+        node1.startElection()
+        
+        # Assert that lowest is leader
+        self.assertEqual(False, node5.isLeader())
+        self.assertEqual(False, node4.isLeader())
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(True, node1.isLeader())
+
+
+    def test_HighestElected_When_LowestKilledAndStarted(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        nodeArray = [node1, node2, node3, node4, node5]
+
+        for node in nodeArray:
+            node.setOtherProcessIDs(nodeArray)
+        
+        node1.killNode()
+        node2.startElection()
+        
+        # Assert that highest is leader after node kill
+        self.assertEqual(True, node5.isLeader())
+        self.assertEqual(False, node4.isLeader())
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+
+        # Assert that highest is leader after node start
+        node1.startNode()
+        self.assertEqual(True, node5.isLeader())
+        self.assertEqual(False, node4.isLeader())
+        self.assertEqual(False, node3.isLeader())
+        self.assertEqual(False, node2.isLeader())
+        self.assertEqual(False, node1.isLeader())
+        self.assertEqual(node5.id, node1.whoseLeader) # Assert that node1 gets correct leader
+
+class UnitTest(unittest.TestCase):
+    def test_AllNeighborsSet(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        neighborArray = [node1, node2, node3, node4, node5]
+        expectedNeighbors = [node5, node4, node2, node1] # The list gets sorted from high-to-low when setting neighbors
+
+        node3.setOtherProcessIDs(neighborArray)
+
+        self.assertEqual(expectedNeighbors, node3.neighbors)
+
+
+    def test_IsAliveReturnsTrue_When_NodeIsAlive(self):
+        node1 = OriginalBullyProcess(1)
+        self.assertEqual(True, node1.isAlive)
+      
+
+    def test_IsAliveReturnsFalse_When_NodeIsKilled(self):
+        node1 = OriginalBullyProcess(1)
+        node1.killNode()
+        self.assertEqual(False, node1.isAlive)
+
+
+    def test_whoseLeaderReturnsInt_When_NoLeaderSelected(self):
+        node1 = OriginalBullyProcess(1)
+        self.assertEqual(int, node1.whoseLeader)
+
+
+    def test_isLeaderReturnsFalse_When_NoLeaderSelected(self):
+        node1 = OriginalBullyProcess(1)
+        self.assertEqual(False, node1.isLeader())
+
+
+    def test_nodeGetsElected_When_NodeStartsAfterKilled(self):
+        node1 = OriginalBullyProcess(1)
+        node1.killNode()
+        node1.startNode()
+
+        self.assertEqual(True, node1.isLeader())
+
+
+    def test_HigherAndLowerNeighborsSet_When_SplitNeighborsCalled(self):
+        node1 = OriginalBullyProcess(1)
+        node2 = OriginalBullyProcess(2)
+        node3 = OriginalBullyProcess(3)
+        node4 = OriginalBullyProcess(4)
+        node5 = OriginalBullyProcess(5)
+
+        node3.setOtherProcessIDs([node1, node2, node3, node4, node5])
+
+        node3.splitNeighbors()
+
+        self.assertEqual([node5.id, node4.id], node3.allHigherNeighbors)
+        self.assertEqual([node5.id, node4.id], node3.nonTimedOutHigherNeighbors)
+        self.assertEqual([node2.id, node1.id], node3.lowerNeighbors)
+
+
 
 
 
