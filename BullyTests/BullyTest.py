@@ -3,6 +3,16 @@ from OriginalBullyProcess import OriginalBullyProcess
 
 
 class SystemTest(unittest.TestCase):
+
+    def printLeader(self, nodeArray):
+        for node in nodeArray:
+            print(node.whoseLeader)
+
+    def assertLeader(self, nodeArray, leaderId):
+        for node in nodeArray:
+            self.assertEqual(leaderId, node.whoseLeader)
+
+        
     def test_HighestElectedLeader_When_LowestStartsElection(self):
         node1 = OriginalBullyProcess(1)
         node2 = OriginalBullyProcess(2)
@@ -22,6 +32,8 @@ class SystemTest(unittest.TestCase):
         self.assertEqual(False, node3.isLeader())
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
+
+        self.assertLeader(nodeArray, node5.id)
 
 
     def test_HighestElectedLeader_When_HighestStartElection(self):
@@ -44,6 +56,8 @@ class SystemTest(unittest.TestCase):
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
 
+        self.assertLeader(nodeArray, node5.id)
+
 
     def test_HighestElectedLeader_When_MiddleStartsElection(self):
         node1 = OriginalBullyProcess(1)
@@ -64,6 +78,8 @@ class SystemTest(unittest.TestCase):
         self.assertEqual(False, node3.isLeader())
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
+
+        self.assertLeader(nodeArray, node5.id)
 
 
     def test_SecondHighestElected_When_HighestIsDead(self):
@@ -89,6 +105,8 @@ class SystemTest(unittest.TestCase):
         self.assertEqual(False, node3.isLeader())
         self.assertEqual(True, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
+        self.assertEqual(node2.id, node1.whoseLeader)
+        self.assertEqual(node2.id, node2.whoseLeader)
         
 
     def test_Node2Then3Elected_When_Node3KilledAndStarted(self):
@@ -115,6 +133,8 @@ class SystemTest(unittest.TestCase):
         self.assertEqual(True, node3.isLeader())
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
+        
+        self.assertLeader(nodeArray, node3.id)
 
 
     def test_NodeDoesNotLearnLeader_When_NodeIsDead(self):
@@ -193,6 +213,9 @@ class SystemTest(unittest.TestCase):
         self.assertEqual(False, node2.isLeader())
         self.assertEqual(False, node1.isLeader())
         self.assertEqual(node5.id, node1.whoseLeader) # Assert that node1 gets correct leader
+        self.assertLeader(nodeArray, node5.id)
+
+
 
 class UnitTest(unittest.TestCase):
     def test_AllNeighborsSet(self):
@@ -203,7 +226,7 @@ class UnitTest(unittest.TestCase):
         node5 = OriginalBullyProcess(5)
 
         neighborArray = [node1, node2, node3, node4, node5]
-        expectedNeighbors = [node5, node4, node2, node1] # The list gets sorted from high-to-low when setting neighbors
+        expectedNeighbors = [node1, node2, node4, node5] # The list gets sorted from high-to-low when setting neighbors
 
         node3.setOtherProcessIDs(neighborArray)
 
@@ -250,9 +273,9 @@ class UnitTest(unittest.TestCase):
 
         node3.splitNeighbors()
 
-        self.assertEqual([node5.id, node4.id], node3.allHigherNeighbors)
-        self.assertEqual([node5.id, node4.id], node3.nonTimedOutHigherNeighbors)
-        self.assertEqual([node2.id, node1.id], node3.lowerNeighbors)
+        self.assertEqual([node4.id, node5.id], node3.allHigherNeighbors)
+        self.assertEqual([node4.id, node5.id], node3.nonTimedOutHigherNeighbors)
+        self.assertEqual([node1.id, node2.id], node3.lowerNeighbors)
 
 
 
