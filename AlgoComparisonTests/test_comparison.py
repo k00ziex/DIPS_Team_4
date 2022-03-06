@@ -170,3 +170,100 @@ class ComparisonCases(unittest.TestCase):
 
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
+    # 101 messages --> 1 Election + 1 ACK + 99 Coordinator msgs, ignore ACK --> 100 msgs
+    def test_Improved_100AliveNodes_HighestIDAlive(self):
+        listOfP = []
+        networkMessagesSent = [0]
+        n_nodes = 100
+
+        for i in range(0, n_nodes):
+            process = ImprovedBullyProcess(i, networkMessagesSent)
+            listOfP.append(process)
+        
+        for p in listOfP:
+            p.setNeighbors(listOfP)
+
+        listOfP[0].startElection()
+
+        for p in listOfP:
+            print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
+
+        print(f"Messages Sent in Network: {networkMessagesSent[0]}")
+    
+    # Adds 5 extra messages. 
+    def test_Improved_100AliveNodes_FiveHighestIDsDead(self):
+        listOfP = []
+        networkMessagesSent = [0]
+        n_nodes = 100
+
+        for i in range(0, n_nodes):
+            process = ImprovedBullyProcess(i, networkMessagesSent)
+            listOfP.append(process)
+        
+        for p in listOfP:
+            p.setNeighbors(listOfP)
+
+        listOfP[len(listOfP) - 1].killNode()
+        listOfP[len(listOfP) - 2].killNode()
+        listOfP[len(listOfP) - 3].killNode()
+        listOfP[len(listOfP) - 4].killNode()
+        listOfP[len(listOfP) - 5].killNode()
+        listOfP[0].startElection()
+        
+
+        for p in listOfP:
+            print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
+
+        print(f"Messages Sent in Network: {networkMessagesSent[0]}")
+
+
+    # TODO: Does it make sense that this is only 106 messages?
+    def test_Original_100AliveNodes_FiveHighestIDsDead(self):
+        listOfP = []
+        networkMessagesSent = [0]
+        n_nodes = 100
+
+        for i in range(0, n_nodes):
+            process = OriginalBullyProcess(i, networkMessagesSent)
+            listOfP.append(process)
+        
+    
+        for p in listOfP:
+            p.setOtherProcessIDs(listOfP)
+
+        listOfP[len(listOfP) - 1].killNode()
+        listOfP[len(listOfP) - 2].killNode()
+        listOfP[len(listOfP) - 3].killNode()
+        listOfP[len(listOfP) - 4].killNode()
+        listOfP[len(listOfP) - 5].killNode()
+        listOfP[0].startElection()
+
+        for p in listOfP:
+            print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
+        
+        print(f"Messages Sent in Network: {networkMessagesSent[0]}")
+
+    #198 messages --> basically as bad as original + the latency will be big. 
+    def test_Improved_100AliveNodes_StarterIsHighest(self):
+        listOfP = []
+        networkMessagesSent = [0]
+        n_nodes = 100
+
+        for i in range(0, n_nodes):
+            process = ImprovedBullyProcess(i, networkMessagesSent)
+            listOfP.append(process)
+        
+        for p in listOfP:
+            p.setNeighbors(listOfP)
+
+        # Kill nodes [99, 98... 1] only ID 0 is alive.
+        for index in reversed(range(1, n_nodes)):
+            listOfP[index].killNode()
+
+        listOfP[0].startElection()
+
+        for p in listOfP:
+            print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
+
+        print(f"Messages Sent in Network: {networkMessagesSent[0]}")
+
