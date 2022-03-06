@@ -8,12 +8,15 @@ class OriginalBullyProcess(Process):
     messagesSent = []
 
 
-    def __init__(self, id, messagesSent) -> None:
+    def __init__(self, id, messagesSent=[0]) -> None:
         self.isAlive = True
         self.isPossibleCandidate = False
         self.id = id
         self.messagesSent = 0
         self.messagesSent = messagesSent
+        self.allHigherNeighbors = []
+        self.lowerNeighbors = []
+        self.nonTimedOutHigherNeighbors = []
 
 
     def receiveMessage(self, message, senderId):
@@ -21,15 +24,13 @@ class OriginalBullyProcess(Process):
             if(message == Messages.Election):
                 if(self.id > self.neighbors[0].id): # TODO: Write a comment here as to why we index
                     # Send coordinator message if we are the highest ID
-                    for process in self.neighbors:
-                        self.whoseLeader = self.id
-                        self.sendMessage(Messages.Coordinator, process.id)
-                else:
-                    for process in self.neighbors:
-                        if(process.id == senderId):
-                            self.sendMessage(Messages.Answer, process.id) 
+                    self.whoseLeader = self.id
+                    self.sendMessage(Messages.Coordinator, senderId)
 
-                    self.startElection()      
+                else:
+                    self.sendMessage(Messages.Answer, senderId) 
+
+                    self.startElection()
                             
             elif(message == Messages.Coordinator):
                 self.whoseLeader = senderId
