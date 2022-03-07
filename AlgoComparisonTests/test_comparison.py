@@ -8,7 +8,7 @@ class ComparisonCases(unittest.TestCase):
         listOfP = []
         networkMessagesSent = [0]
 
-        for i in range(1,10):
+        for i in range(1,11):
             process = OriginalBullyProcess(i, networkMessagesSent)
             listOfP.append(process)
                 

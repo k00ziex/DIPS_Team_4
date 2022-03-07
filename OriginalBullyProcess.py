@@ -24,12 +24,12 @@ class OriginalBullyProcess(Process):
             if(message == Messages.Election):
                 if(self.id > self.neighbors[0].id): # TODO: Write a comment here as to why we index
                     # Send coordinator message if we are the highest ID
-                    self.whoseLeader = self.id
-                    self.sendMessage(Messages.Coordinator, senderId)
+                    for process in self.neighbors:
+                        self.whoseLeader = self.id
+                        self.sendMessage(Messages.Coordinator, process.id)
 
                 else:
                     self.sendMessage(Messages.Answer, senderId) 
-
                     self.startElection()
                             
             elif(message == Messages.Coordinator):
