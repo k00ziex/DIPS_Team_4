@@ -2,7 +2,6 @@ from bully import Messages, Process
 import uuid
 
 class OriginalBullyProcess(Process):
-    isPossibleCandidate = bool
     nonTimedOutHigherNeighbors = []
     allHigherNeighbors = []
     lowerNeighbors = []
@@ -11,7 +10,6 @@ class OriginalBullyProcess(Process):
 
     def __init__(self, id, messagesSent=[0]) -> None:
         self.isAlive = True
-        self.isPossibleCandidate = False
         self.id = id
         self.messagesSent = 0
         self.messagesSent = messagesSent
@@ -50,10 +48,10 @@ class OriginalBullyProcess(Process):
                             
             elif(message == Messages.Coordinator):
                 self.whoseLeader = senderId
-                self.isPossibleCandidate = False
 
             elif(message == Messages.Answer):
-                self.isPossibleCandidate = False
+                # Do nothing if we receive an answer
+                pass
 
             elif(message == Messages.Timeout):
                 if(self.nonTimedOutHigherNeighbors.count(senderId) > 0):
@@ -90,7 +88,6 @@ class OriginalBullyProcess(Process):
         if(setElectionID == True):
             self.currentElectionID = uuid.uuid4()
 
-        self.isPossibleCandidate = True
         self.splitNeighbors()
 
         if(len(self.allHigherNeighbors) > 0):
