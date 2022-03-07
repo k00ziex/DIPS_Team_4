@@ -1,4 +1,5 @@
 from bully import Messages, Process
+import uuid
 
 class OriginalBullyProcess(Process):
     isPossibleCandidate = bool
@@ -17,20 +18,24 @@ class OriginalBullyProcess(Process):
         self.allHigherNeighbors = []
         self.lowerNeighbors = []
         self.nonTimedOutHigherNeighbors = []
+        self.currentElectionID = -999
+        self.hasSentCoordinator = False
 
 
-    def receiveMessage(self, message, senderId):
+    def receiveMessage(self, message, senderId, electionID):
         if(self.isAlive == True):
             if(message == Messages.Election):
                 if(self.id > self.neighbors[0].id): # TODO: Write a comment here as to why we index
                     # Send coordinator message if we are the highest ID
                     for process in self.neighbors:
                         self.whoseLeader = self.id
-                        self.sendMessage(Messages.Coordinator, process.id)
+                        self.sendMessage(Messages.Coordinator, process.id, electionID)
 
                 else:
-                    self.sendMessage(Messages.Answer, senderId) 
-                    self.startElection()
+                    self.sendMessage(Messages.Answer, senderId, electionID) 
+                    if(self.currentElectionID != electionID):
+                        self.currentElectionID = electionID
+                        self.startElection(setElectionID=False)
                             
             elif(message == Messages.Coordinator):
                 self.whoseLeader = senderId
@@ -46,21 +51,21 @@ class OriginalBullyProcess(Process):
                 if(len(self.nonTimedOutHigherNeighbors) <= 0): # If all our higher neighbors are timed out, we are the leader
                     self.whoseLeader = self.id
                     for neighborId in self.lowerNeighbors:
-                        self.sendMessage(Messages.Coordinator, neighborId)
+                        self.sendMessage(Messages.Coordinator, neighborId, self.currentElectionID)
 
             else:
                 raise Exception("RECEIVEMESSAGE() EXCEPTION! PANIC!!!")
         else:
             for process in self.neighbors:
                 if(process.id == senderId):
-                    self.sendMessage(Messages.Timeout, process.id)
+                    self.sendMessage(Messages.Timeout, process.id, electionID)
                     break
         
 
-    def sendMessage(self, message, receiverId):
+    def sendMessage(self, message, receiverId, electionID):
         for process in self.neighbors:
             if(process.id == receiverId):
-                process.receiveMessage(message, self.id)
+                process.receiveMessage(message, self.id, electionID)
                 # Count up the total number of messages sent
                 if(message != Messages.Timeout): self.messagesSent[0] = self.messagesSent[0] + 1
 
@@ -70,18 +75,21 @@ class OriginalBullyProcess(Process):
         self.neighbors.remove(self)
 
 
-    def startElection(self):
+    def startElection(self, setElectionID = True):
+        if(setElectionID == True):
+            self.currentElectionID = uuid.uuid4()
+
         self.isPossibleCandidate = True
         self.splitNeighbors()
 
         if(len(self.allHigherNeighbors) > 0):
             for processId in self.allHigherNeighbors:
-                self.sendMessage(Messages.Election, processId)
+                self.sendMessage(Messages.Election, processId, self.currentElectionID)
         else: # If we have no higher neighbors, we elect ourself as leader
             self.whoseLeader = self.id
             if(len(self.lowerNeighbors) > 0):
                 for processId in self.lowerNeighbors:
-                    self.sendMessage(Messages.Coordinator, processId)
+                    self.sendMessage(Messages.Coordinator, processId, self.currentElectionID)
 
 
             

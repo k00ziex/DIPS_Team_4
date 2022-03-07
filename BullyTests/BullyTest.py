@@ -226,7 +226,7 @@ class UnitTest(unittest.TestCase):
         node5 = OriginalBullyProcess(5)
 
         neighborArray = [node1, node2, node3, node4, node5]
-        expectedNeighbors = [node1, node2, node4, node5] # The list gets sorted from high-to-low when setting neighbors
+        expectedNeighbors = [node5, node4, node2, node1] # The list gets sorted from high-to-low when setting neighbors
 
         node3.setOtherProcessIDs(neighborArray)
 
@@ -273,9 +273,9 @@ class UnitTest(unittest.TestCase):
 
         node3.splitNeighbors()
 
-        self.assertEqual([node4.id, node5.id], node3.allHigherNeighbors)
-        self.assertEqual([node4.id, node5.id], node3.nonTimedOutHigherNeighbors)
-        self.assertEqual([node1.id, node2.id], node3.lowerNeighbors)
+        self.assertEqual([node5.id, node4.id], node3.allHigherNeighbors)
+        self.assertEqual([node5.id, node4.id], node3.nonTimedOutHigherNeighbors)
+        self.assertEqual([node2.id, node1.id], node3.lowerNeighbors)
 
 
 
