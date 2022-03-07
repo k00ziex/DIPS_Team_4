@@ -22,6 +22,7 @@ class ComparisonCases(unittest.TestCase):
         
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
+
     def test_improved_10_nodes_none_dead(self): 
         listOfP = []
         networkMessagesSent = [0]
