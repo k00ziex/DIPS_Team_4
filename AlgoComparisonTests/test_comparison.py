@@ -27,7 +27,7 @@ class ComparisonCases(unittest.TestCase):
         listOfP = []
         networkMessagesSent = [0]
 
-        for i in range(1,10):
+        for i in range(0,10):
             process = ImprovedBullyProcess(i, networkMessagesSent)
             listOfP.append(process)
 
@@ -75,7 +75,11 @@ class ComparisonCases(unittest.TestCase):
         for p in listOfP:
             p.setOtherProcessIDs(listOfP)
 
-        listOfP[0].startElection()
+        # Find id 0 and have it start election, to see if we get 9999 msgs
+        for p in listOfP:
+            if(p.id == 0):
+                p.startElection()
+        #listOfP[0].startElection()
 
         for p in listOfP:
             print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
@@ -218,7 +222,6 @@ class ComparisonCases(unittest.TestCase):
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
 
-    # TODO: Does it make sense that this is only 106 messages?
     def test_Original_100AliveNodes_FiveHighestIDsDead(self):
         listOfP = []
         networkMessagesSent = [0]
@@ -266,5 +269,52 @@ class ComparisonCases(unittest.TestCase):
         for p in listOfP:
             print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
 
+        print(f"Messages Sent in Network: {networkMessagesSent[0]}")
+
+
+    def test_Improved_100Nodes_AllExceptStarterDead(self):
+        listOfP = []
+        networkMessagesSent = [0]
+        n_nodes = 100
+        for i in range(0, n_nodes):
+            process = ImprovedBullyProcess(i, networkMessagesSent)
+            listOfP.append(process)
+        
+        for p in listOfP:
+            p.setNeighbors(listOfP)
+
+        for p in listOfP[1:]:
+            p.killNode()
+
+        listOfP[0].startElection()
+
+        for p in listOfP:
+            print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
+
+        print(f"Messages Sent in Network: {networkMessagesSent[0]}")
+
+
+
+    def test_Original_100Nodes_AllExceptStarterDead(self):
+        listOfP = []
+        networkMessagesSent = [0]
+        n_nodes = 100
+
+        for i in range(0, n_nodes):
+            process = OriginalBullyProcess(i, networkMessagesSent)
+            listOfP.append(process)
+        
+    
+        for p in listOfP:
+            p.setOtherProcessIDs(listOfP)
+
+        for p in listOfP[1:]:
+            p.killNode()
+
+        listOfP[0].startElection()
+
+        for p in listOfP:
+            print(f"Process with id: {p.id} says leader is: {p.whoseLeader}")
+        
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
