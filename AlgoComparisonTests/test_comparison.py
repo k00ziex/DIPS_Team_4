@@ -41,8 +41,9 @@ class ComparisonCases(unittest.TestCase):
         
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
-
-    def test_Original_100AliveNodes_NonShuffledListOfProcesses(self):
+    # Scenario 1 
+    # 100 Alive Nodes - Highest ID node is Alive – ID 0 starts election ID 99 is highest
+    def test_scenario1_Original_100AliveNodes_NonShuffledListOfProcesses(self):
         listOfP = []
         networkMessagesSent = [0]
         n_nodes = 100
@@ -175,8 +176,10 @@ class ComparisonCases(unittest.TestCase):
 
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
+    # Scenario 1 
+    # 100 Alive Nodes - Highest ID node is Alive – ID 0 starts election ID 99 is highest
     # 101 messages --> 1 Election + 1 ACK + 99 Coordinator msgs, ignore ACK --> 100 msgs
-    def test_Improved_100AliveNodes_HighestIDAlive(self):
+    def test_scenario1_Improved_100AliveNodes_HighestIDAlive(self):
         listOfP = []
         networkMessagesSent = [0]
         n_nodes = 100
@@ -195,8 +198,10 @@ class ComparisonCases(unittest.TestCase):
 
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
     
+    # Scenario 3 
+    # 100 Nodes - Five Highest ID Nodes Dead – ID 0 starts election [99, 98.. 95] are dead
     # Adds 5 extra messages. 
-    def test_Improved_100AliveNodes_FiveHighestIDsDead(self):
+    def test_scenario3_Improved_100AliveNodes_FiveHighestIDsDead(self):
         listOfP = []
         networkMessagesSent = [0]
         n_nodes = 100
@@ -221,8 +226,9 @@ class ComparisonCases(unittest.TestCase):
 
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
-
-    def test_Original_100AliveNodes_FiveHighestIDsDead(self):
+    # Scenario 3 
+    # 100 Nodes - Five Highest ID Nodes Dead – ID 0 starts election [99, 98.. 95] are dead
+    def test_scenario3_Original_100AliveNodes_FiveHighestIDsDead(self):
         listOfP = []
         networkMessagesSent = [0]
         n_nodes = 100
@@ -272,7 +278,9 @@ class ComparisonCases(unittest.TestCase):
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
 
-    def test_Improved_100Nodes_AllExceptStarterDead(self):
+    # Scenario 2 
+    # 100 Nodes - Starter Has Highest ID – ID 0 starts election all above are dead
+    def test_scenario2_Improved_100Nodes_AllExceptStarterDead(self):
         listOfP = []
         networkMessagesSent = [0]
         n_nodes = 100
@@ -294,8 +302,9 @@ class ComparisonCases(unittest.TestCase):
         print(f"Messages Sent in Network: {networkMessagesSent[0]}")
 
 
-
-    def test_Original_100Nodes_AllExceptStarterDead(self):
+    # Scenario 2 
+    # 100 Nodes - Starter Has Highest ID – ID 0 starts election all above are dead
+    def test_scenario2_Original_100Nodes_AllExceptStarterDead(self):
         listOfP = []
         networkMessagesSent = [0]
         n_nodes = 100
