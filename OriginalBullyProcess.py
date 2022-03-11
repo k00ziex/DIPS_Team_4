@@ -23,7 +23,7 @@ class OriginalBullyProcess(Process):
     def receiveMessage(self, message, senderId, electionID):
         if(self.isAlive == True):
             if(message == Messages.Election):
-                if(self.id > self.neighbors[0].id): # TODO: Write a comment here as to why we index
+                if(self.id > self.neighbors[0].id): #Used to check if we are the highest node in the system
                     # Send coordinator message if we are the highest ID
                     self.sendMessage(Messages.Answer, senderId, electionID)
 
