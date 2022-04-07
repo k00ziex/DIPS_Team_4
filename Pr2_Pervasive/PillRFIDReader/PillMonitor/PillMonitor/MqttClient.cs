@@ -27,6 +27,11 @@ namespace PillMonitor
             client.Connect(Guid.NewGuid().ToString(), username, password, false, ushort.MaxValue);
         }
 
+        public void Disconnect()
+        {
+            client.Disconnect();
+        }
+
         public void Publish(string message, string topic)
         {
             if (!client.IsConnected)

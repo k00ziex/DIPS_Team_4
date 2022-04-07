@@ -15,6 +15,7 @@ namespace PillMonitor
         private MqttClient mqttClient;
         private const string topic = "dipsgrp4/sensors/pillmonitor/rfidreader";
         private string rfidReaderID;
+        private RFID rfidReader;
 
         private void Publish2Mqtt(string msg)
         {
@@ -54,7 +55,7 @@ namespace PillMonitor
         {
             Console.WriteLine(">> Starting RFID Reader Pill Monitor");
 
-            RFID rfidReader = new RFID();
+            rfidReader = new RFID();
             rfidReader.Tag += OnTagDetected;
             rfidReader.TagLost += OnTagLost;
 
@@ -65,13 +66,6 @@ namespace PillMonitor
                 mqttClient.Connect();
                 rfidReader.Open(5000);
                 this.rfidReaderID = rfidReader.DeviceSerialNumber.ToString();
-
-
-                //Wait until Enter has been pressed before exiting
-                Console.WriteLine(">> Detecting Pill movement. Press Enter to stop");
-                Console.ReadLine();
-
-                rfidReader.Close();
             }
             catch (PhidgetException ex)
             {
@@ -83,6 +77,13 @@ namespace PillMonitor
             {
                 Console.WriteLine($"Exception caught:\n" + e.ToString());
             }
+        }
+
+        public void Stop()
+        {
+            Console.WriteLine(">> Stopping RFID Reader Pill Monitor");
+            rfidReader.Close();
+            mqttClient.Disconnect();
         }
     }
 }

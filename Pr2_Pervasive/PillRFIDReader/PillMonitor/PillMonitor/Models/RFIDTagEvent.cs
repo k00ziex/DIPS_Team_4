@@ -15,8 +15,8 @@ namespace PillMonitor.Models
         public RFIDTagEvent(string tag, DateTime timestamp, string state)
         {
             Tag = tag;
-            Timestamp = timestamp;
             State = state;
+            Timestamp = timestamp;
         }
     }
 }

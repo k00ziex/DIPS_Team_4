@@ -15,6 +15,8 @@ namespace PillMonitor
         {
             var rfidMonitor = new RFIDMonitor();
             rfidMonitor.Start();
+            Console.Read();
+            rfidMonitor.Stop();
         }
     }
 }
