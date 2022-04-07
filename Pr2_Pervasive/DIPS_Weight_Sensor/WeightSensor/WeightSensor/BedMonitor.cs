@@ -10,13 +10,14 @@ namespace WeightSensor
     // INSPIRED BY: https://www.phidgets.com/?view=code_samples&lang=CSharp with example for channel 2 for the device 1046_0 - PhidgetBridge 4-Input
     public class BedMonitor
     {
+        // The following two constants have been found via previous runs of the code commented-out further down in the code. This is basically just two constants used for
+        // getting the actual weight of the object in grams.
         private const double MConstant = -32405877.610081911;
         private const double AverageWeight0Reading = -9.1820593870967751E-06;
 
         private MqttClient _mqttClient;
         private const string Topic = "dipsgrp4/sensors/bedmonitor/weightsensor";
         private string _deviceId;
-
         private bool _isOnBed = true;
         private const double WeightThreshold = 3000.0; // Should be a lot higher in reality, but to actually trigger the events we have lowered it
 
