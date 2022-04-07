@@ -22,7 +22,6 @@ namespace PillMonitor
             if(client == null)
             {
                 client = new uPLibrary.Networking.M2Mqtt.MqttClient(brokerUrl, port, true, null, null, MqttSslProtocols.TLSv1_2);
-
             }
 
             client.Connect(Guid.NewGuid().ToString(), username, password, false, ushort.MaxValue);
