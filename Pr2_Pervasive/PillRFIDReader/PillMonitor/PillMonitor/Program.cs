@@ -13,11 +13,8 @@ namespace PillMonitor
 
         static void Main(string[] args)
         {
-
             var rfidMonitor = new RFIDMonitor();
             rfidMonitor.Start();
-
-
         }
     }
 }
