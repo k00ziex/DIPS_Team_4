@@ -14,9 +14,6 @@ import android.view.ViewGroup;
 import com.example.dipspillreminder.R;
 import com.hivemq.client.mqtt.MqttClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-
-import java.io.Console;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -42,15 +39,15 @@ public class PillReminderFragment extends Fragment {
 
         mqttClient = MqttClient.builder()
                 .identifier(UUID.randomUUID().toString())
-                .serverHost("626582a1d37a4c9da269c096cf520060.s1.eu.hivemq.cloud")
-                .serverPort(8883)
+                .serverHost(getString(R.string.HiveMQ_Mqtt_Host))
+                .serverPort(Integer.parseInt(getString(R.string.HiveMQ_Mqtt_Port)))
                 .sslWithDefaultConfig()
                 .useMqttVersion5().buildAsync();
 
         mqttClient.connectWith()
                 .simpleAuth()
-                .username("dipsgrp4")
-                .password("Dipsgrp4password".getBytes())
+                .username(getString(R.string.HiveMQ_Mqtt_Username))
+                .password(getString(R.string.HiveMQ_Mqtt_Password).getBytes())
                 .applySimpleAuth()
                 .send()
                 .whenComplete((connAck, thrower) -> {
