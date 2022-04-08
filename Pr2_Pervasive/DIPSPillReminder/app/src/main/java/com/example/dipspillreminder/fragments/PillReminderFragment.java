@@ -63,6 +63,7 @@ public class PillReminderFragment extends Fragment {
                                 .topicFilter("android/warning")
                                 .callback(publish -> {
                                     // Process the received message
+                                    String mes = new String(publish.getPayloadAsBytes(), StandardCharsets.UTF_8);
                                     Log.d(TAG, "We received a message");
                                 })
                                 .send()
