@@ -26,7 +26,7 @@ namespace PillMonitor
         {
             var tagEvent = new RFIDTagEvent(
                 e.Tag,
-                DateTime.Now,
+                DateTime.UtcNow,
                 "Detected"
                 );
 
@@ -41,7 +41,7 @@ namespace PillMonitor
         {
             var tagEvent = new RFIDTagEvent(
                 e.Tag,
-                DateTime.Now,
+                DateTime.UtcNow,
                 "Lost"
                 );
 
