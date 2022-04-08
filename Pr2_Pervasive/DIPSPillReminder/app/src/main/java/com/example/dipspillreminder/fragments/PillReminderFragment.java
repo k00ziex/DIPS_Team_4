@@ -42,33 +42,35 @@ public class PillReminderFragment extends Fragment {
 
         mqttClient = MqttClient.builder()
                 .identifier(UUID.randomUUID().toString())
-                .serverHost(getString(R.string.HiveMQ_Mqtt_Host))
-                .serverPort(Integer.parseInt(getString(R.string.HiveMQ_Mqtt_Port)))
+                .serverHost("626582a1d37a4c9da269c096cf520060.s1.eu.hivemq.cloud")
+                .serverPort(8883)
+                .sslWithDefaultConfig()
                 .useMqttVersion5().buildAsync();
 
         mqttClient.connectWith()
                 .simpleAuth()
-                .username(String.valueOf(R.string.HiveMQ_Mqtt_Username))
-                .password(String.valueOf(R.string.HiveMQ_Mqtt_Password).getBytes())
+                .username("dipsgrp4")
+                .password("Dipsgrp4password".getBytes())
                 .applySimpleAuth()
                 .send()
                 .whenComplete((connAck, thrower) -> {
                     if(thrower != null) {
                         // handle failure
-                        Log.d(TAG, "onCreate: YIKES");
+                        Log.e(TAG, "Error in authentication to the server");
                     } else {
                         // setup subscribes or start publishing
                         mqttClient.subscribeWith()
                                 .topicFilter("android/warning")
                                 .callback(publish -> {
                                     // Process the received message
+                                    Log.d(TAG, "We received a message");
                                 })
                                 .send()
                                 .whenComplete((subAck, throwable) -> {
                                     if (throwable != null) {
-                                        Log.d(TAG, "onCreate: YIIIIKES2");
+                                        Log.e(TAG, "Error in Subscribing to Topic");
                                     } else {
-                                        Log.i(TAG, "onCreate: WE RECEIECED SHIT");
+                                        Log.i(TAG, "Successfully subcribed to topic");
                                     }
                                 });
                     }
