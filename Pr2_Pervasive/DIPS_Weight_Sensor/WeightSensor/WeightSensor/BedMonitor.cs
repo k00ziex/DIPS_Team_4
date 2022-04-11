@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Phidget22;
 using WeightSensor.Models;
+using WeightSensor.MQTT;
 
 namespace WeightSensor
 {
@@ -87,6 +88,7 @@ namespace WeightSensor
         ~BedMonitor()
         {
             // Ensure that we close connection to both the phidget and MQTT when the class is destroyed
+            _weightSensor.VoltageRatioChange -= PrintWeight;
             _weightSensor.Close();
             _mqttClient.Disconnect();
         }
