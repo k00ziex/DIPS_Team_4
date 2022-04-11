@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">DIPSPillReminder</string>
+    <string name="medicon">Medicon</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="HiveMQ_Mqtt_Host">626582a1d37a4c9da269c096cf520060.s1.eu.hivemq.cloud</string>
+    <string name="HiveMQ_Mqtt_Port">8883</string>
+    <string name="HiveMQ_Mqtt_Username">dipsgrp4</string>
+    <string name="HiveMQ_Mqtt_Password">Dipsgrp4password</string>
+
+
+    <string name="PillReminderFragment">PillReminderFragment_id</string>
+
 </resources>
