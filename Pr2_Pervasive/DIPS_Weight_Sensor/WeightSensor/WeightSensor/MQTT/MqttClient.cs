@@ -2,7 +2,7 @@
 using System.Text;
 using uPLibrary.Networking.M2Mqtt;
 
-namespace WeightSensor
+namespace WeightSensor.MQTT
 {
     // Same as for the RFID Monitor
     class MqttClient
@@ -18,7 +18,6 @@ namespace WeightSensor
             if (_client == null)
             {
                 _client = new uPLibrary.Networking.M2Mqtt.MqttClient(BrokerUrl, Port, true, null, null, MqttSslProtocols.TLSv1_2);
-
             }
 
             _client.Connect(Guid.NewGuid().ToString(), Username, Password, false, ushort.MaxValue);
@@ -34,8 +33,13 @@ namespace WeightSensor
                 topic,
                 Encoding.ASCII.GetBytes(message),
                 uPLibrary.Networking.M2Mqtt.Messages.MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE,
-                false
+                true
             );
+        }
+
+        public void Disconnect()
+        {
+            _client.Disconnect();
         }
     }
 }

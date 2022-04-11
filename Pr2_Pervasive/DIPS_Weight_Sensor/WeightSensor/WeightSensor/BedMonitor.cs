@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using Phidget22;
 using WeightSensor.Models;
 
 namespace WeightSensor
 {
-    // INSPIRED BY: https://www.phidgets.com/?view=code_samples&lang=CSharp with example for channel 2 for the device 1046_0 - PhidgetBridge 4-Input
+    // INSPIRED BY: https://www.phidgets.com/?view=code_samples&lang=CSharp with example for channel 2 for the device "1046_0 - PhidgetBridge 4-Input"
     public class BedMonitor
     {
         // The following two constants have been found via previous runs of the code commented-out further down in the code. This is basically just two constants used for
@@ -15,15 +13,38 @@ namespace WeightSensor
         private const double MConstant = -32405877.610081911;
         private const double AverageWeight0Reading = -9.1820593870967751E-06;
 
-        private MqttClient _mqttClient;
+        private readonly MqttClient _mqttClient;
+        private readonly VoltageRatioInput _weightSensor;
         private const string Topic = "dipsgrp4/sensors/bedmonitor/weightsensor";
-        private string _deviceId;
+        private readonly string _deviceId;
         private bool _isOnBed = true;
         private const double WeightThreshold = 3000.0; // Should be a lot higher in reality, but to actually trigger the events we have lowered it
 
-        private void Publish2Mqtt(string msg)
+        public BedMonitor()
         {
-            _mqttClient.Publish(msg, Topic + "/" + _deviceId);
+            Console.WriteLine(">> Starting Bed Monitor - Weight Sensor");
+
+            _mqttClient = new MqttClient();
+
+            // Create Phidget channel (Depends on connection in bridge)
+            _weightSensor = new VoltageRatioInput {Channel = 2};
+
+            // Add Event handler
+            _weightSensor.VoltageRatioChange += PrintWeight;
+
+            try
+            {
+                // Connect to MQTT
+                _mqttClient.Connect();
+
+                // Open Phidget with timeout
+                _weightSensor.Open(5000);
+                _deviceId = _weightSensor.DeviceSerialNumber.ToString();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private void PrintWeight(object sender, Phidget22.Events.VoltageRatioInputVoltageRatioChangeEventArgs e)
@@ -38,7 +59,7 @@ namespace WeightSensor
                 Publish2Mqtt(bedEventJson);
                 _isOnBed = false;
 
-            } else if (weightInGrams < WeightThreshold && !_isOnBed) // Else if we've previously read 30+ kg as the weight, then we must react if it is sensing below 30 kg now
+            } else if (weightInGrams < WeightThreshold && !_isOnBed) // Else if we've previously read 30+ kg as the weight, then we must react if it is sensing below 30 kg
             {
                 var bedEvent = new BedEvent(_deviceId, DateTime.UtcNow, "Off Bed");
 
@@ -50,45 +71,33 @@ namespace WeightSensor
             // Else, do nothing
         }
 
+        private void Publish2Mqtt(string msg)
+        {
+            _mqttClient.Publish(msg, Topic + "/" + _deviceId);
+        }
+
         public void Start()
         {
-            Console.WriteLine(">> Starting Bed Monitor - Weight Sensor");
-
-            // Create Phidget channel (Depends on connection in bridge)
-            var voltageRatioInput = new VoltageRatioInput { Channel = 2 };
-
-            // Add Event handler
-            voltageRatioInput.VoltageRatioChange += PrintWeight;
-
-
-            _mqttClient = new MqttClient();
-
-            try
+            while (true)
             {
-                _mqttClient.Connect();
-
-                // Open Phidget with timeout
-                voltageRatioInput.Open(5000);
-                _deviceId = voltageRatioInput.DeviceSerialNumber.ToString();
+                // Infinitely wait for events to happen
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            // Wait for the 'Enter' key to be pressed
-            Console.ReadLine();
-
-
-            // Close the Phidget channel
-            voltageRatioInput.Close();
         }
+
+        ~BedMonitor()
+        {
+            // Ensure that we close connection to both the phidget and MQTT when the class is destroyed
+            _weightSensor.Close();
+            _mqttClient.Disconnect();
+        }
+
+
 
 
         /**************************************************************************************************************************
          *
          * The following functions and constants are used for calculating MCal and the average reading of when no mass is
-         * on the weight.
+         * present on the weight.
          *
          * ************************************************************************************************************************/
 
