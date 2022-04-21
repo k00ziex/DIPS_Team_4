@@ -98,36 +98,34 @@ namespace ContextAwareness.Handlers
 
         private void OffBedEvent(WeightSensor sensorData)
         {
-            switch (currentState)
+            if (currentState == State.Sleeping)
             {
-                case State.Sleeping:
-                    if ( !HasBeenRemindedToday() && WithinNormalWakeupWindow(sensorData.Timestamp) )
-                    {
-                        // Send wakeup time to DB? For calculating average. But is hardcoded for now.
-                        currentState = State.Awake;
-                        currentSubState = SubState.RemindAndAwaitMedicine;
+                if (!HasBeenRemindedToday() && WithinNormalWakeupWindow(sensorData.Timestamp))
+                {
+                    // Send wakeup time to DB? For calculating average. But is hardcoded for now.
+                    currentState = State.Awake;
+                    currentSubState = SubState.RemindAndAwaitMedicine;
 
-                        // TODO: Pill reminder. 
-                        SendPillReminderCommand();
-                    }
-                    else if (TimePassedSincePillTaken() < new TimeSpan(1,0,0)
-                        && HasBeenRemindedToday())
-                    {
-                        currentState = State.Awake;
-                        currentSubState = SubState.NotAllowedToEatOrDrink;
+                    // TODO: Pill reminder. 
+                    SendPillReminderCommand();
+                }
+                else if (TimePassedSincePillTaken() < new TimeSpan(1, 0, 0)
+                         && HasBeenRemindedToday())
+                {
+                    currentState = State.Awake;
+                    currentSubState = SubState.NotAllowedToEatOrDrink;
 
-                        // Lightcommand on
-                        SendLightCommand("ON");
-                    }
-                    else if (TimePassedSincePillTaken() >= new TimeSpan(1,0,0) 
-                        && HasBeenRemindedToday())
-                    {
-
-                    }
-                    break;
-                default:
-                    break;
-                
+                    // Lightcommand on
+                    SendLightCommand("ON");
+                }
+                else if (TimePassedSincePillTaken() >= new TimeSpan(1, 0, 0)
+                         && HasBeenRemindedToday())
+                {
+                }
+            }
+            else
+            {
+                // Do nothing if we're in an "Awake" state
             }
         }
 
