@@ -33,7 +33,7 @@ namespace WeightSensor.MQTT
                 topic,
                 Encoding.ASCII.GetBytes(message),
                 uPLibrary.Networking.M2Mqtt.Messages.MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE,
-                true
+                false
             );
         }
 
