@@ -19,8 +19,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        pillReminderFragment = PillReminderFragment.getInstance();
-        bottomNavigationBarMenu = BottomNavigationBarMenu.getInstance(this);
+        if (pillReminderFragment == null){
+            pillReminderFragment = new PillReminderFragment();
+        }
+        if (bottomNavigationBarMenu == null){
+            bottomNavigationBarMenu = new BottomNavigationBarMenu(this);
+        }
 
         bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
 
