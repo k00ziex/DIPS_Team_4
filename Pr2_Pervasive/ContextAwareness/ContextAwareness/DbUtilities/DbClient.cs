@@ -15,7 +15,6 @@ namespace ContextAwareness.DbUtilities
         public object data { get; set; }
 
     }
-
     public class DbClient
     {
         private MongoClient client;
@@ -54,7 +53,7 @@ namespace ContextAwareness.DbUtilities
         public async Task CreateReminderAsync(Reminder newReminder) =>
             await reminderCollection.InsertOneAsync(newReminder);
 
-        public async Task FindReminderAsync(FilterDefinition<Reminder> filter) =>
+        public async Task<Reminder> FindReminderAsync(FilterDefinition<Reminder> filter) =>
             await reminderCollection.Find(filter).FirstOrDefaultAsync();
         
 

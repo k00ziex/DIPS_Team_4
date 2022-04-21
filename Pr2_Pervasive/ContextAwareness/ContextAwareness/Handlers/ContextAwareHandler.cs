@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ContextAwareness.Mqtt;
 using System.Text.Json;
+using System.Timers;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -17,6 +18,7 @@ namespace ContextAwareness.Handlers
     {
         private readonly DbClient dbClient;
         private readonly MqttClient mqttClient;
+        private Timer oneHourTimer;
 
         private enum State
         {
@@ -37,7 +39,6 @@ namespace ContextAwareness.Handlers
         private State currentState = State.Sleeping;
         private SubState? currentSubState = null;
 
-        private bool hasNotBeenPillReminded = true;
         private TimeSpan wakeupTimeAverage = new TimeSpan(8, 30, 0);
         
         private TimeSpan wakeupTimeSlack = new TimeSpan(1, 0, 0); // +- 1 hour window for waking up. 
@@ -99,50 +100,70 @@ namespace ContextAwareness.Handlers
 
         private void OffBedEvent(WeightSensor sensorData)
         {
-            switch (currentState)
+            if (currentState == State.Sleeping)
             {
-                case State.Sleeping:
-                    if ( !HasBeenRemindedToday() && WithinNormalWakeupWindow(sensorData.Timestamp) )
-                    {
-                        // Send wakeup time to DB? For calculating average. But is hardcoded for now.
-                        currentState = State.Awake;
-                        currentSubState = SubState.RemindAndAwaitMedicine;
+                if (!HasBeenRemindedToday() && WithinNormalWakeupWindow(sensorData.Timestamp))
+                {
+                    // Send wakeup time to DB? For calculating average. But is hardcoded for now.
+                    currentState = State.Awake;
+                    currentSubState = SubState.RemindAndAwaitMedicine;
 
-                        // TODO: Pill reminder. 
-                        SendPillReminderCommand();
-                    }
-                    else if (TimePassedSincePillTaken() < new TimeSpan(1,0,0)
-                        && HasBeenRemindedToday())
-                    {
-                        currentState = State.Awake;
-                        currentSubState = SubState.NotAllowedToEatOrDrink;
+                    // TODO: Pill reminder. 
+                    SendPillReminderCommand();
+                }
+                else if (TimePassedSincePillTaken() < new TimeSpan(1, 0, 0)
+                         && HasBeenRemindedToday())
+                {
+                    currentState = State.Awake;
+                    currentSubState = SubState.NotAllowedToEatOrDrink;
 
-                        // Lightcommand on
-                        SendLightCommand("ON");
-                    }
-                    else if (TimePassedSincePillTaken() >= new TimeSpan(1,0,0) 
-                        && HasBeenRemindedToday())
-                    {
-
-                    }
-                    break;
-                default:
-                    break;
-                
+                    // Lightcommand on
+                    SendLightCommand("ON");
+                }
+                else if (TimePassedSincePillTaken() >= new TimeSpan(1, 0, 0)
+                         && HasBeenRemindedToday())
+                {
+                }
+            }
+            else
+            {
+                // Do nothing if we're in an "Awake" state
             }
         }
 
-        
-
         private void OnBedEvent(WeightSensor sensorData)
         {
-            currentState = State.Sleeping;
-            currentSubState = null;
+            if (currentState == State.Awake)
+            {
+                currentState = State.Sleeping;
+                currentSubState = null;
+            }
         }
 
         private void PillTakenEvent(RFID sensorData)
         {
+            if(currentState == State.Awake && currentSubState == SubState.RemindAndAwaitMedicine)
+            {
+                currentState = State.Awake;
+                currentSubState = SubState.NotAllowedToEatOrDrink;
+                
+                SendLightCommand("On");
+                InitAndStartOneHourTimer();
+            }
+            else
+            {
+                Console.WriteLine("Pill has already been taken, but is taken again :("); 
+            }
+        }
 
+        private void OneHourPassedEvent(object sender, EventArgs e)
+        {
+            if(currentState == State.Awake && currentSubState == SubState.NotAllowedToEatOrDrink)
+            {
+                currentState = State.Awake;
+                currentSubState = SubState.AllowedToEatOrDrink;
+            }
+            SendLightCommand("Off");
         }
 
         private bool WithinNormalWakeupWindow(DateTime dateTime)
@@ -171,12 +192,24 @@ namespace ContextAwareness.Handlers
 
         private void SendLightCommand(string onOrOff)
         {
-            mqttClient.Publish(onOrOff.ToUpperInvariant(), $"{lightTopic}/{onOrOff.ToLowerInvariant()}");
+            var lightCommand = new LightCommand
+            {
+                Data = onOrOff.ToUpperInvariant()
+            };
+            var lightCommandToJson = JsonSerializer.Serialize(lightCommand);
+            mqttClient.Publish(lightCommandToJson, $"{lightTopic}/{onOrOff.ToLowerInvariant()}");
         }
 
         private void SendPillReminderCommand()
         {
-            mqttClient.Publish("It is time for you to take your daily pill.", $"{pillReminderTopic}");
+            var reminderModel = new Reminder
+            {
+                Comment = "It is time for you to take your daily pull",
+                Id = Guid.NewGuid().ToString(),
+                Timestamp = DateTime.UtcNow
+            };
+            var reminderModelToJson = JsonSerializer.Serialize(reminderModel);
+            mqttClient.Publish(reminderModelToJson, $"{pillReminderTopic}");
         }
 
         private void PrintState()
@@ -187,6 +220,17 @@ namespace ContextAwareness.Handlers
             { 
                 Console.WriteLine($"SubState: {currentSubState}"); 
             }
+        }
+
+        private void InitAndStartOneHourTimer()
+        {
+            if (oneHourTimer == null) 
+            { 
+                oneHourTimer = new Timer(60 * 1000);
+                oneHourTimer.Elapsed += OneHourPassedEvent;
+            }
+
+            oneHourTimer.Start();
         }
     }
 }

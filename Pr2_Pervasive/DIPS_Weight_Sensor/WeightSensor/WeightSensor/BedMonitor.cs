@@ -30,9 +30,6 @@ namespace WeightSensor
             // Create Phidget channel (Depends on connection in bridge)
             _weightSensor = new VoltageRatioInput {Channel = 2};
 
-            // Add Event handler
-            _weightSensor.VoltageRatioChange += PrintWeight;
-
             try
             {
                 // Connect to MQTT
@@ -41,6 +38,9 @@ namespace WeightSensor
                 // Open Phidget with timeout
                 _weightSensor.Open(5000);
                 _deviceId = _weightSensor.DeviceSerialNumber.ToString();
+
+                // Add Event handler
+                _weightSensor.VoltageRatioChange += PrintWeight;
             }
             catch (Exception e)
             {
