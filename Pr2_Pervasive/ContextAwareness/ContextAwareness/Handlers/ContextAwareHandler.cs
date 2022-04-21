@@ -1,4 +1,5 @@
 ﻿using ContextAwareness.DbUtilities;
+using ContextAwareness.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +26,13 @@ namespace ContextAwareness.Handlers
             NotAllowedToEatOrDrink = 2,
         }
 
-        private int currentState;
-        private int currentSubState;
+        private State currentState;
+        private SubState currentSubState;
+
+        private bool hasNotBeenPillReminded = true;
+        private TimeSpan wakeupTimeAverage = new TimeSpan(8, 30, 0);
+        
+        private TimeSpan wakeupTimeSlack = new TimeSpan(1, 0, 0); // +- 1 hour window for waking up. 
 
         public ContextAwareHandler(DbClient client)
         {
@@ -37,15 +43,37 @@ namespace ContextAwareness.Handlers
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
         {
-            switch(e.Type)
+            if (e.data is WeightSensor)
             {
-                 
+
+            }
+            else if (e.data is RFID)
+            {
+
+            }
+            else
+            {
+                // :(
             }
         }
 
         private void OffBedEvent()
         {
+            switch (currentState)
+            {
+                case State.Sleeping:
+                    if(hasNotBeenPillReminded && WithinNormalWakeupWindow(DateTime.Now))
+                    {
 
+                    }
+                    break;
+
+
+
+                default:
+                    break;
+                
+            }
         }
 
         private void OnBedEvent()
@@ -56,6 +84,16 @@ namespace ContextAwareness.Handlers
         private void PillTakenEvent()
         {
 
+        }
+
+        private bool WithinNormalWakeupWindow(DateTime dateTime)
+        {
+            var time = dateTime.TimeOfDay;
+
+            var timespanStart = wakeupTimeAverage - wakeupTimeSlack;
+            var timespanEnd = wakeupTimeAverage - wakeupTimeSlack;
+         
+            return (timespanStart <= time && time <= timespanEnd);
         }
     }
 }

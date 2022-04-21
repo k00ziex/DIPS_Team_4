@@ -10,7 +10,8 @@ namespace ContextAwareness.DbUtilities
 {
     public class NewDataAvailableEventArgs : EventArgs
     {
-        public string Type { get; set; }
+        //public string Type { get; set; } 
+        public object data { get; set; }
 
     }
     public class DbClient
@@ -46,10 +47,10 @@ namespace ContextAwareness.DbUtilities
 
 
 
-        public void CreateDataEvent(string type)
+        public void CreateDataEvent(object data)
         {
             NewDataAvailableEventArgs args = new NewDataAvailableEventArgs();
-            args.Type = type;
+            args.data = data;
             OnNewDataAvailable(args);
         }
 
