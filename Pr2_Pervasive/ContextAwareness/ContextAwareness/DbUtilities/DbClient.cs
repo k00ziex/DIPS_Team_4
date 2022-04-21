@@ -15,6 +15,7 @@ namespace ContextAwareness.DbUtilities
         public object data { get; set; }
 
     }
+
     public class DbClient
     {
         private MongoClient client;

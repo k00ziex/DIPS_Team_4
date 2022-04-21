@@ -73,6 +73,20 @@ namespace ContextAwareness.Mqtt
             client.Subscribe(topic, qosLevel);
         }
 
+        public void Publish(string message, string topic)
+        {
+            if (!client.IsConnected)
+            {
+                Connect();
+            }
+            client.Publish(
+                topic,
+                Encoding.ASCII.GetBytes(message),
+                uPLibrary.Networking.M2Mqtt.Messages.MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE,
+                false
+                );
+        }
+
         //Might be a bug with the await n shit
         private async void Client_MqttMsgPublishReceived(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgPublishEventArgs e)
         {

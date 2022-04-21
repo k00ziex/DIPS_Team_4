@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ContextAwareness.Mqtt;
+using System.Text.Json;
+
 
 namespace ContextAwareness.Handlers
 {
@@ -12,6 +15,7 @@ namespace ContextAwareness.Handlers
     public class ContextAwareHandler
     {
         private readonly DbClient dbClient;
+        private readonly MqttClient mqttClient;
 
         private enum State
         {
@@ -26,35 +30,70 @@ namespace ContextAwareness.Handlers
             NotAllowedToEatOrDrink = 2,
         }
 
-        private State currentState;
-        private SubState currentSubState;
+        private readonly string lightTopic = "dipsgrp4/outputs/light/commands";
+        private readonly string pillReminderTopic = "dipsgrp4/outputs/smartphone/commands/pillreminder";
+
+        private State currentState = State.Sleeping;
+        private SubState? currentSubState = null;
 
         private bool hasNotBeenPillReminded = true;
         private TimeSpan wakeupTimeAverage = new TimeSpan(8, 30, 0);
         
         private TimeSpan wakeupTimeSlack = new TimeSpan(1, 0, 0); // +- 1 hour window for waking up. 
 
-        public ContextAwareHandler(DbClient client)
+        public ContextAwareHandler(DbClient client, MqttClient mqttClient)
         {
-            dbClient = client;
+            dbClient = client ?? throw new ArgumentNullException(nameof(client));
+            this.mqttClient = mqttClient ?? throw new ArgumentNullException(nameof(mqttClient));
 
             dbClient.NewDataAvailable += DbClient_NewDataAvailable;
+
+            // Infer state? Should state change events be saved in DB?
+            Console.WriteLine("\nContextAwareHandler started");
+            PrintState();
         }
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
         {
-            if (e.data is WeightSensor)
-            {
+            Console.WriteLine("Received data:\n" + JsonSerializer.Serialize(e.data));
+            PrintState();
 
+            if (e.data is WeightSensor bedEvent)
+            {
+                switch (bedEvent.State)
+                {
+                    case "On Bed":
+                        OnBedEvent(bedEvent);
+                        break;
+                    case "Off Bed":
+                        OffBedEvent(bedEvent);
+                        break;
+
+                    default:
+                        throw new ArgumentException("Wrong bed event state");
+                }
             }
-            else if (e.data is RFID)
+            else if (e.data is RFID pillEvent)
             {
+                switch (pillEvent.State)
+                {
+                    case "Detected":
+                        break;
 
+                    case "Lost":
+                        PillTakenEvent(pillEvent);
+                        break;
+
+                    default:
+                        break;
+                }
             }
             else
             {
                 // :(
             }
+
+            PrintState();
         }
 
         private void OffBedEvent(WeightSensor sensorData)
@@ -62,28 +101,42 @@ namespace ContextAwareness.Handlers
             switch (currentState)
             {
                 case State.Sleeping:
-                    if (hasNotBeenPillReminded && WithinNormalWakeupWindow(sensorData.Timestamp))
+                    if ( !HasBeenRemindedToday() && WithinNormalWakeupWindow(sensorData.Timestamp) )
                     {
                         // Send wakeup time to DB? For calculating average. But is hardcoded for now.
+                        currentState = State.Awake;
+                        currentSubState = SubState.RemindAndAwaitMedicine;
 
+                        // TODO: Pill reminder. 
+                        SendPillReminderCommand();
                     }
-                    else if (false)
+                    else if (TimePassedSincePillTaken() < new TimeSpan(1,0,0)
+                        && HasBeenRemindedToday())
+                    {
+                        currentState = State.Awake;
+                        currentSubState = SubState.NotAllowedToEatOrDrink;
+
+                        // Lightcommand on
+                        SendLightCommand("ON");
+                    }
+                    else if (TimePassedSincePillTaken() >= new TimeSpan(1,0,0) 
+                        && HasBeenRemindedToday())
                     {
 
                     }
                     break;
-
-
-
                 default:
                     break;
                 
             }
         }
 
+        
+
         private void OnBedEvent(WeightSensor sensorData)
         {
-
+            currentState = State.Sleeping;
+            currentSubState = null;
         }
 
         private void PillTakenEvent(RFID sensorData)
@@ -109,6 +162,26 @@ namespace ContextAwareness.Handlers
         private TimeSpan TimePassedSincePillTaken()
         {
             throw new NotImplementedException(); // TODO: DO
+        }
+
+        private void SendLightCommand(string onOrOff)
+        {
+            mqttClient.Publish(onOrOff.ToUpperInvariant(), $"{lightTopic}/{onOrOff.ToLowerInvariant()}");
+        }
+
+        private void SendPillReminderCommand()
+        {
+            mqttClient.Publish("It is time for you to take your daily pill.", $"{pillReminderTopic}");
+        }
+
+        private void PrintState()
+        {
+            Console.WriteLine("\nContextAwareHandler State is:");
+            Console.Write($"State: {currentState}");
+            if(currentSubState != null) 
+            { 
+                Console.WriteLine($"SubState: {currentSubState}"); 
+            }
         }
     }
 }
