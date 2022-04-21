@@ -8,18 +8,10 @@ import com.google.android.material.navigation.NavigationBarView;
 
 public class BottomNavigationBarMenu implements NavigationBarView.OnItemSelectedListener {
 
-    private static BottomNavigationBarMenu instance;
-    private MainActivity mainActivity;
+    private final MainActivity mainActivity;
 
-    private BottomNavigationBarMenu(MainActivity mainActivity_) {
+    public BottomNavigationBarMenu(MainActivity mainActivity_) {
         mainActivity = mainActivity_;
-    }
-
-    public static BottomNavigationBarMenu getInstance(MainActivity mainActivity) {
-        if(instance == null) {
-            instance = new BottomNavigationBarMenu(mainActivity);
-        }
-        return instance;
     }
 
     @Override

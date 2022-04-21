@@ -1,9 +1,18 @@
 package com.example.dipspillreminder.services;
 
 import static android.content.ContentValues.TAG;
+
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -23,13 +32,31 @@ public class NotificationServices extends Service {
     private static final int notificationId = 10002;
     private static Mqtt5AsyncClient mqttClient;
     final String CHANNELID = "Foreground NotificationService ID";
+    final String CHANNELNAME = "Foreground NotificationService NAME";
+    final private String MQTTReminderTopic ="dipsgrp4/outputs/smartphone/commands/pillreminder";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        createNotificationChannel();
+
         startMqttListener();
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void createNotificationChannel() {
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        NotificationChannel mChannel = new NotificationChannel(CHANNELID, CHANNELNAME, NotificationManager.IMPORTANCE_HIGH);
+        Uri uri = Uri.parse("android.resource://"+getPackageName()+"/" + R.raw.defaultnotificationsound);
+
+        mChannel.enableLights(true);
+        mChannel.setSound(uri, null);
+        mChannel.setLightColor(Color.RED);
+        mChannel.enableVibration(true);
+        mNotificationManager.createNotificationChannel(mChannel);
+
     }
 
     @Nullable
@@ -60,7 +87,7 @@ public class NotificationServices extends Service {
                     } else {
                         // setup subscribes or start publishing
                         mqttClient.subscribeWith()
-                                .topicFilter("android/warning")
+                                .topicFilter(MQTTReminderTopic)
                                 .callback(publish -> {
                                     // Process the received message
                                     String mes = new String(publish.getPayloadAsBytes(), StandardCharsets.UTF_8);
@@ -87,8 +114,7 @@ public class NotificationServices extends Service {
                 .setContentTitle("Medicine Warning")
                 .setAutoCancel(true)
                 .setContentText("Good Morning, Remember to take your medicine")
-                .setPriority(NotificationCompat.PRIORITY_MIN);
-
+                .setPriority(NotificationCompat.PRIORITY_MAX);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(notificationId, builder.build());
 

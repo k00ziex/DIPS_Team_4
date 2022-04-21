@@ -1,41 +1,23 @@
 package com.example.dipspillreminder.fragments;
 
-import static android.content.ContentValues.TAG;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.dipspillreminder.R;
 import com.example.dipspillreminder.services.NotificationServices;
-import com.hivemq.client.mqtt.MqttClient;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-import java.util.UUID;
 
 public class PillReminderFragment extends Fragment {
 
-    private static PillReminderFragment instance;
 
-
-    private PillReminderFragment() {
-    }
-
-    public static PillReminderFragment getInstance() {
-        if(instance == null) {
-            instance = new PillReminderFragment();
-        }
-        return instance;
+    public PillReminderFragment() {
     }
 
     @Override
