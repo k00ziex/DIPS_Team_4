@@ -23,9 +23,11 @@ namespace ContextAwareness.DbUtilities
         private readonly string databaseName = "ContextAwareMetrics";
         private readonly string rfidCollectionName = "RFIDData";
         private readonly string weightCollectionName = "WeightSensorData";
+        private readonly string reminderCollectionName = "Reminders";
 
         private readonly IMongoCollection<RFID> rfidCollection;
         private readonly IMongoCollection<WeightSensor> weightCollection;
+        private readonly IMongoCollection<Reminder> reminderCollection;
 
         public DbClient()
         {
@@ -37,6 +39,8 @@ namespace ContextAwareness.DbUtilities
 
             rfidCollection = database.GetCollection<RFID>(rfidCollectionName);
             weightCollection = database.GetCollection<WeightSensor>(weightCollectionName);
+            reminderCollection = database.GetCollection<Reminder>(reminderCollectionName);
+
         }
 
         public async Task CreateRFIDAsync(RFID newRFID) =>
@@ -45,6 +49,8 @@ namespace ContextAwareness.DbUtilities
         public async Task CreateWeigtAsync(WeightSensor newWeight) =>
             await weightCollection.InsertOneAsync(newWeight);
 
+        public async Task CreateReminderAsync(Reminder newReminder) =>
+            await reminderCollection.InsertOneAsync(newReminder);
 
 
         public void CreateDataEvent(object data)
