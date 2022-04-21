@@ -186,12 +186,24 @@ namespace ContextAwareness.Handlers
 
         private void SendLightCommand(string onOrOff)
         {
-            mqttClient.Publish(onOrOff.ToUpperInvariant(), $"{lightTopic}/{onOrOff.ToLowerInvariant()}");
+            var lightCommand = new LightCommand
+            {
+                Data = onOrOff.ToUpperInvariant()
+            };
+            var lightCommandToJson = JsonSerializer.Serialize(lightCommand);
+            mqttClient.Publish(lightCommandToJson, $"{lightTopic}/{onOrOff.ToLowerInvariant()}");
         }
 
         private void SendPillReminderCommand()
         {
-            mqttClient.Publish("It is time for you to take your daily pill.", $"{pillReminderTopic}");
+            var reminderModel = new Reminder
+            {
+                Comment = "It is time for you to take your daily pull",
+                Id = Guid.NewGuid().ToString(),
+                Timestamp = DateTime.UtcNow
+            };
+            var reminderModelToJson = JsonSerializer.Serialize(reminderModel);
+            mqttClient.Publish(reminderModelToJson, $"{pillReminderTopic}");
         }
 
         private void PrintState()
