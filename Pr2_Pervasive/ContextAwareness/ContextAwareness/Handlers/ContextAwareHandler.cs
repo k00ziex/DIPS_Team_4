@@ -25,6 +25,9 @@ namespace ContextAwareness.Handlers
             NotAllowedToEatOrDrink = 2,
         }
 
+        private int currentState;
+        private int currentSubState;
+
         public ContextAwareHandler(DbClient client)
         {
             dbClient = client;
@@ -34,10 +37,18 @@ namespace ContextAwareness.Handlers
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
         {
-            //Maybe check the type of the event data and call the corresponding methods
+            switch(e.Type)
+            {
+                 
+            }
         }
 
         private void OffBedEvent()
+        {
+
+        }
+
+        private void OnBedEvent()
         {
 
         }

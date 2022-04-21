@@ -45,6 +45,7 @@ namespace ContextAwareness.DbUtilities
             await weightCollection.InsertOneAsync(newWeight);
 
 
+
         public void CreateDataEvent(string type)
         {
             NewDataAvailableEventArgs args = new NewDataAvailableEventArgs();

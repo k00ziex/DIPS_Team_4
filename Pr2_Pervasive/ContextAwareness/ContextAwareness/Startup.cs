@@ -43,7 +43,7 @@ namespace ContextAwareness
 
             mqttClient.Connect();
             mqttClient.SetupEvents();
-            mqttClient.Subscribe(new[] { "dipsgrp4/sensors/bedmonitor/weightsensor/#" }, new[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+            mqttClient.Subscribe(new[] { "dipsgrp4/sensors/#" }, new[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

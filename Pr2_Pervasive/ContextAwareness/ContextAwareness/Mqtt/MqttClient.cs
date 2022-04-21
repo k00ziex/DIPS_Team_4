@@ -73,13 +73,25 @@ namespace ContextAwareness.Mqtt
             client.Subscribe(topic, qosLevel);
         }
 
-        private void Client_MqttMsgPublishReceived(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgPublishEventArgs e)
+        //Might be a bug with the await n shit
+        private async void Client_MqttMsgPublishReceived(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgPublishEventArgs e)
         {
 
-            //TODO: Make This better
             var message = Encoding.UTF8.GetString(e.Message);
-            var data = JsonSerializer.Deserialize<WeightSensor>(message);
-            _ = dbClient.CreateWeigtAsync(data);
+            
+            if (e.Topic.ToLower().Contains("bedmonitor"))
+            {
+                var data = JsonSerializer.Deserialize<WeightSensor>(message);
+                await dbClient.CreateWeigtAsync(data);
+                dbClient.CreateDataEvent("weight");
+            } 
+            else if(e.Topic.ToLower().Contains("pillmonitor"))
+            {
+                var data = JsonSerializer.Deserialize<RFID>(message);
+                await dbClient.CreateRFIDAsync(data);
+                dbClient.CreateDataEvent("rfid");
+            }
+            
             
             Console.WriteLine(e.Topic);
             Console.WriteLine(e.Message);
