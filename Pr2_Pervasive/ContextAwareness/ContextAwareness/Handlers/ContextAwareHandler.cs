@@ -6,7 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using ContextAwareness.Mqtt;
 using System.Text.Json;
-
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace ContextAwareness.Handlers
 {
@@ -156,7 +157,11 @@ namespace ContextAwareness.Handlers
 
         private bool HasBeenRemindedToday()
         {
-            throw new NotImplementedException(); // TODO: DO
+            var date = DateTime.Today;
+            var filter = Builders<Reminder>.Filter.Where(t => t.Timestamp.Date == date);
+            var reminder = dbClient.FindReminderAsync(filter).Result;
+
+            return reminder.Timestamp == date;
         }
         
         private TimeSpan TimePassedSincePillTaken()
