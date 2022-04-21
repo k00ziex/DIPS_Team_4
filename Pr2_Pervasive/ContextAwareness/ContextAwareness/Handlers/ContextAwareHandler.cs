@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using ContextAwareness.Mqtt;
 using System.Text.Json;
 using System.Timers;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace ContextAwareness.Handlers
 {
@@ -179,18 +181,13 @@ namespace ContextAwareness.Handlers
             return (timespanStart <= time && time <= timespanEnd);
         }
 
-        // TODO REMOVE STUB
-        private bool b = false;
         private bool HasBeenRemindedToday()
         {
-            // STUB CODE 
-            if (!b)
-            {
-                b = true;
-                return false;
-            }
-            return b;
-            // STUB CODE
+            var date = DateTime.Today;
+            var filter = Builders<Reminder>.Filter.Where(t => t.Timestamp.Date == date);
+            var reminder = dbClient.FindReminderAsync(filter).Result;
+
+            return reminder.Timestamp == date;
         }
         
         private TimeSpan TimePassedSincePillTaken()
