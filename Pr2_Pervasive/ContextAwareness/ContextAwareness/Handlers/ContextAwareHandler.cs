@@ -12,6 +12,19 @@ namespace ContextAwareness.Handlers
     {
         private readonly DbClient dbClient;
 
+        private enum State
+        {
+            Sleeping = 0,
+            Awake = 1,
+        }
+
+        private enum SubState
+        {
+            RemindAndAwaitMedicine = 0,
+            AllowedToEatOrDrink = 1,
+            NotAllowedToEatOrDrink = 2,
+        }
+
         public ContextAwareHandler(DbClient client)
         {
             dbClient = client;
@@ -21,7 +34,17 @@ namespace ContextAwareness.Handlers
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
         {
-            throw new NotImplementedException();
+            //Maybe check the type of the event data and call the corresponding methods
+        }
+
+        private void OffBedEvent()
+        {
+
+        }
+
+        private void PillTakenEvent()
+        {
+
         }
     }
 }
