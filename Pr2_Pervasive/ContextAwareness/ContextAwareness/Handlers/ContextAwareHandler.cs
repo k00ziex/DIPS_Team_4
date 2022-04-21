@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ContextAwareness.Mqtt;
 using System.Text.Json;
-
+using System.Timers;
 
 namespace ContextAwareness.Handlers
 {
@@ -16,6 +16,7 @@ namespace ContextAwareness.Handlers
     {
         private readonly DbClient dbClient;
         private readonly MqttClient mqttClient;
+        private Timer oneHourTimer;
 
         private enum State
         {
@@ -36,7 +37,6 @@ namespace ContextAwareness.Handlers
         private State currentState = State.Sleeping;
         private SubState? currentSubState = null;
 
-        private bool hasNotBeenPillReminded = true;
         private TimeSpan wakeupTimeAverage = new TimeSpan(8, 30, 0);
         
         private TimeSpan wakeupTimeSlack = new TimeSpan(1, 0, 0); // +- 1 hour window for waking up. 
@@ -129,17 +129,39 @@ namespace ContextAwareness.Handlers
             }
         }
 
-        
-
         private void OnBedEvent(WeightSensor sensorData)
         {
-            currentState = State.Sleeping;
-            currentSubState = null;
+            if (currentState == State.Awake)
+            {
+                currentState = State.Sleeping;
+                currentSubState = null;
+            }
         }
 
         private void PillTakenEvent(RFID sensorData)
         {
+            if(currentState == State.Awake && currentSubState == SubState.RemindAndAwaitMedicine)
+            {
+                currentState = State.Awake;
+                currentSubState = SubState.NotAllowedToEatOrDrink;
+                
+                SendLightCommand("On");
+                InitAndStartOneHourTimer();
+            }
+            else
+            {
+                Console.WriteLine("Pill has already been taken, but is taken again :("); 
+            }
+        }
 
+        private void OneHourPassedEvent(object sender, EventArgs e)
+        {
+            if(currentState == State.Awake && currentSubState == SubState.NotAllowedToEatOrDrink)
+            {
+                currentState = State.Awake;
+                currentSubState = SubState.AllowedToEatOrDrink;
+            }
+            SendLightCommand("Off");
         }
 
         private bool WithinNormalWakeupWindow(DateTime dateTime)
@@ -180,6 +202,17 @@ namespace ContextAwareness.Handlers
             { 
                 Console.WriteLine($"SubState: {currentSubState}"); 
             }
+        }
+
+        private void InitAndStartOneHourTimer()
+        {
+            if (oneHourTimer == null) 
+            { 
+                oneHourTimer = new Timer(60 * 1000);
+                oneHourTimer.Elapsed += OneHourPassedEvent;
+            }
+
+            oneHourTimer.Start();
         }
     }
 }
