@@ -52,13 +52,35 @@ namespace ContextAwareness.Handlers
             Console.WriteLine("Received data:\n" + JsonSerializer.Serialize(e.data));
             PrintState();
 
-            if (e.data is WeightSensor)
+            if (e.data is WeightSensor bedEvent)
             {
+                switch (bedEvent.State)
+                {
+                    case "On Bed":
+                        OnBedEvent(bedEvent);
+                        break;
+                    case "Off Bed":
+                        OffBedEvent(bedEvent);
+                        break;
 
+                    default:
+                        throw new ArgumentException("Wrong bed event state");
+                }
             }
-            else if (e.data is RFID)
+            else if (e.data is RFID pillEvent)
             {
+                switch (pillEvent.State)
+                {
+                    case "Detected":
+                        break;
 
+                    case "Lost":
+                        PillTakenEvent(pillEvent);
+                        break;
+
+                    default:
+                        break;
+                }
             }
             else
             {
@@ -97,9 +119,6 @@ namespace ContextAwareness.Handlers
 
                     }
                     break;
-
-
-
                 default:
                     break;
                 
@@ -110,7 +129,8 @@ namespace ContextAwareness.Handlers
 
         private void OnBedEvent(WeightSensor sensorData)
         {
-
+            currentState = State.Sleeping;
+            currentSubState = null;
         }
 
         private void PillTakenEvent(RFID sensorData)
