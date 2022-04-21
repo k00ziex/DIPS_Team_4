@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
+
 
 namespace ContextAwareness.Handlers
 {
@@ -42,11 +44,14 @@ namespace ContextAwareness.Handlers
 
             // Infer state? Should state change events be saved in DB?
             Console.WriteLine("\nContextAwareHandler started");
-
+            PrintState();
         }
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
         {
+            Console.WriteLine("Received data:\n" + JsonSerializer.Serialize(e.data));
+            PrintState();
+
             if (e.data is WeightSensor)
             {
 
@@ -59,6 +64,8 @@ namespace ContextAwareness.Handlers
             {
                 // :(
             }
+
+            PrintState();
         }
 
         private void OffBedEvent(WeightSensor sensorData)
