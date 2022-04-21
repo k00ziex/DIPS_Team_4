@@ -41,6 +41,8 @@ namespace ContextAwareness.Handlers
             dbClient.NewDataAvailable += DbClient_NewDataAvailable;
 
             // Infer state? Should state change events be saved in DB?
+            Console.WriteLine("\nContextAwareHandler started");
+
         }
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
@@ -71,6 +73,7 @@ namespace ContextAwareness.Handlers
                         currentSubState = SubState.RemindAndAwaitMedicine;
 
                         // TODO: Pill reminder. 
+                        SendPillRemminderCommand();
                     }
                     else if (TimePassedSincePillTaken() < new TimeSpan(1,0,0)
                         && HasBeenRemindedToday())
@@ -79,6 +82,7 @@ namespace ContextAwareness.Handlers
                         currentSubState = SubState.NotAllowedToEatOrDrink;
 
                         // Lightcommand on
+                        SendLightOnCommand();
                     }
                     else if (TimePassedSincePillTaken() >= new TimeSpan(1,0,0) 
                         && HasBeenRemindedToday())
@@ -94,6 +98,8 @@ namespace ContextAwareness.Handlers
                 
             }
         }
+
+        
 
         private void OnBedEvent(WeightSensor sensorData)
         {
@@ -125,9 +131,19 @@ namespace ContextAwareness.Handlers
             throw new NotImplementedException(); // TODO: DO
         }
 
+        private void SendLightOnCommand()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SendPillRemminderCommand()
+        {
+            throw new NotImplementedException();
+        }
+
         private void PrintState()
         {
-            Console.WriteLine("\nCurrent State is:");
+            Console.WriteLine("\nContextAwareHandler State is:");
             Console.Write($"State: {currentState}");
             if(currentSubState != null) 
             { 
