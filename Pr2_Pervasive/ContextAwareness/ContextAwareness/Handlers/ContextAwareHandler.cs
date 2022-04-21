@@ -57,7 +57,7 @@ namespace ContextAwareness.Handlers
             }
         }
 
-        private void OffBedEvent()
+        private void OffBedEvent(WeightSensor sensorData)
         {
             switch (currentState)
             {
@@ -76,12 +76,12 @@ namespace ContextAwareness.Handlers
             }
         }
 
-        private void OnBedEvent()
+        private void OnBedEvent(WeightSensor sensorData)
         {
 
         }
 
-        private void PillTakenEvent()
+        private void PillTakenEvent(RFID sensorData)
         {
 
         }
