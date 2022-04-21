@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace ContextAwareness.DbUtilities
@@ -53,6 +54,9 @@ namespace ContextAwareness.DbUtilities
         public async Task CreateReminderAsync(Reminder newReminder) =>
             await reminderCollection.InsertOneAsync(newReminder);
 
+        public async Task FindReminderAsync(FilterDefinition<Reminder> filter) =>
+            await reminderCollection.Find(filter).FirstOrDefaultAsync();
+        
 
         public void CreateDataEvent(object data)
         {
