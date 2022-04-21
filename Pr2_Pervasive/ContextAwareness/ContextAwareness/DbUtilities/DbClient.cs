@@ -14,6 +14,7 @@ namespace ContextAwareness.DbUtilities
         public object data { get; set; }
 
     }
+
     public class DbClient
     {
         private MongoClient client;
@@ -69,11 +70,6 @@ namespace ContextAwareness.DbUtilities
             {
                 handler(this, e);
             }
-        }
-
-        public override string ToString()
-        {
-            return "";
         }
     }
 }
