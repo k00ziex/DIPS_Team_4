@@ -80,7 +80,7 @@ namespace ContextAwareness.Mqtt
             var message = Encoding.UTF8.GetString(e.Message);
             var data = JsonSerializer.Deserialize<WeightSensor>(message);
             _ = dbClient.CreateWeigtAsync(data);
-
+            
             Console.WriteLine(e.Topic);
             Console.WriteLine(e.Message);
         }

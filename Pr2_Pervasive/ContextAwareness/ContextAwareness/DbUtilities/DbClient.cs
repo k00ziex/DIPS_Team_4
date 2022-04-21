@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace ContextAwareness.DbUtilities
 {
+    public class NewDataAvailableEventArgs : EventArgs
+    {
+        public string Type { get; set; }
+
+    }
     public class DbClient
     {
         private MongoClient client;
@@ -38,5 +43,24 @@ namespace ContextAwareness.DbUtilities
 
         public async Task CreateWeigtAsync(WeightSensor newWeight) =>
             await weightCollection.InsertOneAsync(newWeight);
+
+
+        public void CreateDataEvent(string type)
+        {
+            NewDataAvailableEventArgs args = new NewDataAvailableEventArgs();
+            args.Type = type;
+            OnNewDataAvailable(args);
+        }
+
+        public event EventHandler<NewDataAvailableEventArgs> NewDataAvailable;
+
+        protected virtual void OnNewDataAvailable(NewDataAvailableEventArgs e)
+        {
+            EventHandler<NewDataAvailableEventArgs> handler = NewDataAvailable;
+            if(handler != null)
+            {
+                handler(this, e);
+            }
+        }
     }
 }
