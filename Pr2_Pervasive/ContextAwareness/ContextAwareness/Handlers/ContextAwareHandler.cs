@@ -10,8 +10,6 @@ using System.Timers;
 
 namespace ContextAwareness.Handlers
 {
-
-
     public class ContextAwareHandler
     {
         private readonly DbClient dbClient;
@@ -39,7 +37,7 @@ namespace ContextAwareness.Handlers
 
         private TimeSpan wakeupTimeAverage = new TimeSpan(8, 30, 0);
         
-        private TimeSpan wakeupTimeSlack = new TimeSpan(1, 0, 0); // +- 1 hour window for waking up. 
+        private TimeSpan wakeupTimeSlack = new TimeSpan(12, 0, 0); // +- 1 hour window for waking up. 
 
         public ContextAwareHandler(DbClient client, MqttClient mqttClient)
         {
@@ -169,19 +167,19 @@ namespace ContextAwareness.Handlers
             var time = dateTime.TimeOfDay;
 
             var timespanStart = wakeupTimeAverage - wakeupTimeSlack;
-            var timespanEnd = wakeupTimeAverage - wakeupTimeSlack;
+            var timespanEnd = wakeupTimeAverage + wakeupTimeSlack;
          
             return (timespanStart <= time && time <= timespanEnd);
         }
 
         private bool HasBeenRemindedToday()
         {
-            throw new NotImplementedException(); // TODO: DO
+            return false; // TODO
         }
         
         private TimeSpan TimePassedSincePillTaken()
         {
-            throw new NotImplementedException(); // TODO: DO
+            return new TimeSpan(1, 0, 0);
         }
 
         private void SendLightCommand(string onOrOff)
@@ -202,13 +200,17 @@ namespace ContextAwareness.Handlers
             { 
                 Console.WriteLine($"SubState: {currentSubState}"); 
             }
+            Console.WriteLine();
         }
 
         private void InitAndStartOneHourTimer()
         {
+            Console.WriteLine("Timer elapsed");
             if (oneHourTimer == null) 
-            { 
-                oneHourTimer = new Timer(60 * 1000);
+            {
+                var minutes = 1;
+                var conversionRatio = 1000;
+                oneHourTimer = new Timer(minutes * conversionRatio);
                 oneHourTimer.Elapsed += OneHourPassedEvent;
             }
 

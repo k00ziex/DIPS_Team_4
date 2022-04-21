@@ -107,8 +107,8 @@ namespace ContextAwareness.Mqtt
             }
             
             
-            Console.WriteLine(e.Topic);
-            Console.WriteLine(e.Message);
+            //Console.WriteLine(e.Topic);
+            //Console.WriteLine(e.Message);
         }
 
         private void Client_MqttMsgUnsubscribed(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgUnsubscribedEventArgs e)
