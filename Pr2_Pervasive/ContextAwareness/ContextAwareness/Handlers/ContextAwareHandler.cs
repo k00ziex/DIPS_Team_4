@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ContextAwareness.Mqtt;
 
 namespace ContextAwareness.Handlers
 {
@@ -12,6 +13,7 @@ namespace ContextAwareness.Handlers
     public class ContextAwareHandler
     {
         private readonly DbClient dbClient;
+        private readonly MqttClient mqttClient;
 
         private enum State
         {
@@ -26,6 +28,9 @@ namespace ContextAwareness.Handlers
             NotAllowedToEatOrDrink = 2,
         }
 
+        private readonly string lightTopic = "dipsgrp4/outputs/light/commands";
+        private readonly string pillReminderTopic = "dipsgrp4/outputs/smartphone/commands/pillreminder";
+
         private State currentState = State.Sleeping;
         private SubState? currentSubState = null;
 
@@ -34,9 +39,10 @@ namespace ContextAwareness.Handlers
         
         private TimeSpan wakeupTimeSlack = new TimeSpan(1, 0, 0); // +- 1 hour window for waking up. 
 
-        public ContextAwareHandler(DbClient client)
+        public ContextAwareHandler(DbClient client, MqttClient mqttClient)
         {
-            dbClient = client;
+            dbClient = client ?? throw new ArgumentNullException(nameof(client));
+            this.mqttClient = mqttClient ?? throw new ArgumentNullException(nameof(mqttClient));
 
             dbClient.NewDataAvailable += DbClient_NewDataAvailable;
 
@@ -73,7 +79,7 @@ namespace ContextAwareness.Handlers
                         currentSubState = SubState.RemindAndAwaitMedicine;
 
                         // TODO: Pill reminder. 
-                        SendPillRemminderCommand();
+                        SendPillReminderCommand();
                     }
                     else if (TimePassedSincePillTaken() < new TimeSpan(1,0,0)
                         && HasBeenRemindedToday())
@@ -82,7 +88,7 @@ namespace ContextAwareness.Handlers
                         currentSubState = SubState.NotAllowedToEatOrDrink;
 
                         // Lightcommand on
-                        SendLightOnCommand();
+                        SendLightCommand("ON");
                     }
                     else if (TimePassedSincePillTaken() >= new TimeSpan(1,0,0) 
                         && HasBeenRemindedToday())
@@ -131,14 +137,14 @@ namespace ContextAwareness.Handlers
             throw new NotImplementedException(); // TODO: DO
         }
 
-        private void SendLightOnCommand()
+        private void SendLightCommand(string onOrOff)
         {
-            throw new NotImplementedException();
+            mqttClient.Publish(onOrOff.ToUpperInvariant(), $"{lightTopic}/{onOrOff.ToLowerInvariant()}");
         }
 
-        private void SendPillRemminderCommand()
+        private void SendPillReminderCommand()
         {
-            throw new NotImplementedException();
+            mqttClient.Publish("It is time for you to take your daily pill.", $"{pillReminderTopic}");
         }
 
         private void PrintState()
