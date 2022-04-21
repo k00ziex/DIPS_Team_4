@@ -26,8 +26,8 @@ namespace ContextAwareness.Handlers
             NotAllowedToEatOrDrink = 2,
         }
 
-        private State currentState;
-        private SubState currentSubState;
+        private State currentState = State.Sleeping;
+        private SubState? currentSubState = null;
 
         private bool hasNotBeenPillReminded = true;
         private TimeSpan wakeupTimeAverage = new TimeSpan(8, 30, 0);
@@ -39,6 +39,8 @@ namespace ContextAwareness.Handlers
             dbClient = client;
 
             dbClient.NewDataAvailable += DbClient_NewDataAvailable;
+
+            // Infer state? Should state change events be saved in DB?
         }
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
@@ -62,12 +64,24 @@ namespace ContextAwareness.Handlers
             switch (currentState)
             {
                 case State.Sleeping:
-                    if (hasNotBeenPillReminded && WithinNormalWakeupWindow(sensorData.Timestamp))
+                    if ( !HasBeenRemindedToday() && WithinNormalWakeupWindow(sensorData.Timestamp) )
                     {
                         // Send wakeup time to DB? For calculating average. But is hardcoded for now.
+                        currentState = State.Awake;
+                        currentSubState = SubState.RemindAndAwaitMedicine;
 
+                        // TODO: Pill reminder. 
                     }
-                    else if (false)
+                    else if (TimePassedSincePillTaken() < new TimeSpan(1,0,0)
+                        && HasBeenRemindedToday())
+                    {
+                        currentState = State.Awake;
+                        currentSubState = SubState.NotAllowedToEatOrDrink;
+
+                        // Lightcommand on
+                    }
+                    else if (TimePassedSincePillTaken() >= new TimeSpan(1,0,0) 
+                        && HasBeenRemindedToday())
                     {
 
                     }
@@ -109,6 +123,16 @@ namespace ContextAwareness.Handlers
         private TimeSpan TimePassedSincePillTaken()
         {
             throw new NotImplementedException(); // TODO: DO
+        }
+
+        private void PrintState()
+        {
+            Console.WriteLine("\nCurrent State is:");
+            Console.Write($"State: {currentState}");
+            if(currentSubState != null) 
+            { 
+                Console.WriteLine($"SubState: {currentSubState}"); 
+            }
         }
     }
 }
