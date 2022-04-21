@@ -62,7 +62,12 @@ namespace ContextAwareness.Handlers
             switch (currentState)
             {
                 case State.Sleeping:
-                    if(hasNotBeenPillReminded && WithinNormalWakeupWindow(DateTime.Now))
+                    if (hasNotBeenPillReminded && WithinNormalWakeupWindow(sensorData.Timestamp))
+                    {
+                        // Send wakeup time to DB? For calculating average. But is hardcoded for now.
+
+                    }
+                    else if (false)
                     {
 
                     }
@@ -94,6 +99,16 @@ namespace ContextAwareness.Handlers
             var timespanEnd = wakeupTimeAverage - wakeupTimeSlack;
          
             return (timespanStart <= time && time <= timespanEnd);
+        }
+
+        private bool HasBeenRemindedToday()
+        {
+            throw new NotImplementedException(); // TODO: DO
+        }
+        
+        private TimeSpan TimePassedSincePillTaken()
+        {
+            throw new NotImplementedException(); // TODO: DO
         }
     }
 }
