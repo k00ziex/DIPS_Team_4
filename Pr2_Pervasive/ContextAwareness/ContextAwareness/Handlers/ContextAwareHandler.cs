@@ -53,7 +53,9 @@ namespace ContextAwareness.Handlers
 
         private void DbClient_NewDataAvailable(object sender, NewDataAvailableEventArgs e)
         {
-            Console.WriteLine("Received data:\n" + JsonSerializer.Serialize(e.data));
+            
+            Console.WriteLine("\n### Received new data:\n" + JsonSerializer.Serialize(e.data));
+            Console.WriteLine("State was:");
             PrintState();
 
             if (e.data is WeightSensor bedEvent)
@@ -91,6 +93,7 @@ namespace ContextAwareness.Handlers
                 // :(
             }
 
+            Console.WriteLine("State is now:");
             PrintState();
         }
 
@@ -119,6 +122,9 @@ namespace ContextAwareness.Handlers
                 else if (TimePassedSincePillTaken() >= new TimeSpan(1, 0, 0)
                          && HasBeenRemindedToday())
                 {
+                    currentState = State.Awake;
+                    currentSubState = SubState.AllowedToEatOrDrink;
+                    SendLightCommand("Off");
                 }
             }
             else
@@ -160,6 +166,7 @@ namespace ContextAwareness.Handlers
                 currentSubState = SubState.AllowedToEatOrDrink;
             }
             SendLightCommand("Off");
+            PrintState();
         }
 
         private bool WithinNormalWakeupWindow(DateTime dateTime)
@@ -172,9 +179,18 @@ namespace ContextAwareness.Handlers
             return (timespanStart <= time && time <= timespanEnd);
         }
 
+        // TODO REMOVE STUB
+        private bool b = false;
         private bool HasBeenRemindedToday()
         {
-            return false; // TODO
+            // STUB CODE 
+            if (!b)
+            {
+                b = true;
+                return false;
+            }
+            return b;
+            // STUB CODE
         }
         
         private TimeSpan TimePassedSincePillTaken()
@@ -206,8 +222,7 @@ namespace ContextAwareness.Handlers
 
         private void PrintState()
         {
-            Console.WriteLine("\nContextAwareHandler State is:");
-            Console.Write($"State: {currentState}");
+            Console.WriteLine($"State: {currentState}");
             if(currentSubState != null) 
             { 
                 Console.WriteLine($"SubState: {currentSubState}"); 
@@ -220,12 +235,13 @@ namespace ContextAwareness.Handlers
             Console.WriteLine("Timer elapsed");
             if (oneHourTimer == null) 
             {
-                var minutes = 1;
+                var seconds = 10;
                 var conversionRatio = 1000;
-                oneHourTimer = new Timer(minutes * conversionRatio);
+                oneHourTimer = new Timer(seconds * conversionRatio);
                 oneHourTimer.Elapsed += OneHourPassedEvent;
             }
 
+            oneHourTimer.AutoReset = false;
             oneHourTimer.Start();
         }
     }
