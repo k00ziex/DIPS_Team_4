@@ -48,7 +48,7 @@ namespace ContextAwareness.Handlers
 
             dbClient.NewDataAvailable += DbClient_NewDataAvailable;
 
-            // Infer state? Should state change events be saved in DB?
+            // TODO: (Out of scope) Infer state? Should state change events be saved in DB?
             Console.WriteLine("\nContextAwareHandler started");
             PrintState();
         }
@@ -109,7 +109,6 @@ namespace ContextAwareness.Handlers
                     currentState = State.Awake;
                     currentSubState = SubState.RemindAndAwaitMedicine;
 
-                    // TODO: Pill reminder. 
                     SendPillReminderCommand();
                 }
                 else if (TimePassedSincePillTaken() < new TimeSpan(1, 0, 0)
@@ -118,10 +117,9 @@ namespace ContextAwareness.Handlers
                     currentState = State.Awake;
                     currentSubState = SubState.NotAllowedToEatOrDrink;
 
-                    // Lightcommand on
                     SendLightCommand("ON");
                 }
-                else if (TimePassedSincePillTaken() >= new TimeSpan(1, 0, 0)
+                else if (TimePassedSincePillTaken() >= new TimeSpan(1, 0, 0) // TODO find out why wrong state - something with time.
                          && HasBeenRemindedToday())
                 {
                     currentState = State.Awake;
@@ -144,7 +142,7 @@ namespace ContextAwareness.Handlers
             }
         }
 
-        private void PillTakenEvent(RFID sensorData)
+        private async void PillTakenEvent(RFID sensorData)
         {
             if(currentState == State.Awake && currentSubState == SubState.RemindAndAwaitMedicine)
             {
@@ -152,6 +150,7 @@ namespace ContextAwareness.Handlers
                 currentSubState = SubState.NotAllowedToEatOrDrink;
                 
                 SendLightCommand("On");
+                await dbClient.CreatePillTakenAsync(sensorData);
                 InitAndStartOneHourTimer();
             }
             else
@@ -183,16 +182,38 @@ namespace ContextAwareness.Handlers
 
         private bool HasBeenRemindedToday()
         {
-            var date = DateTime.Today;
-            var filter = Builders<Reminder>.Filter.Where(t => t.Timestamp.Date == date);
-            var reminder = dbClient.FindReminderAsync(filter).Result;
+            var date = DateTime.Now.Date;
+            // Query for Timestamp greater than or equal to today
+            var dateQuery = new BsonDocument
+            {
+                {
+                    "Timestamp", new BsonDocument{{"$gte", date}}
+                }
+            };
 
-            return reminder.Timestamp == date;
+            var reminder = dbClient.FindReminderAsync(dateQuery).Result;
+            if(reminder == null)
+            {
+                return false;
+            }
+            return reminder.Timestamp.Date == date;
         }
         
         private TimeSpan TimePassedSincePillTaken()
         {
-            return new TimeSpan(1, 0, 0);
+            var date = DateTime.Today;
+            
+            var today = DateTime.Today;
+            // Query for Timestamp greater than or equal to today
+            var filter = new BsonDocument
+            {
+                {
+                    "Timestamp", new BsonDocument{{"$gte", date}}
+                }
+            };
+            var savedEvent = dbClient.FindPillTakenAsync(filter).Result;
+            
+            return DateTime.Now.TimeOfDay - savedEvent.Timestamp.TimeOfDay;
         }
 
         private void SendLightCommand(string onOrOff)
@@ -205,16 +226,17 @@ namespace ContextAwareness.Handlers
             mqttClient.Publish(lightCommandToJson, $"{lightTopic}/{onOrOff.ToLowerInvariant()}");
         }
 
-        private void SendPillReminderCommand()
+        private async void SendPillReminderCommand()
         {
             var reminderModel = new Reminder
             {
                 Comment = "It is time for you to take your daily pull",
-                Id = Guid.NewGuid().ToString(),
+                //Id = Guid.NewGuid().ToString(),
                 Timestamp = DateTime.UtcNow
             };
             var reminderModelToJson = JsonSerializer.Serialize(reminderModel);
             mqttClient.Publish(reminderModelToJson, $"{pillReminderTopic}");
+            await dbClient.CreateReminderAsync(reminderModel);
         }
 
         private void PrintState()
@@ -232,7 +254,7 @@ namespace ContextAwareness.Handlers
             Console.WriteLine("Timer elapsed");
             if (oneHourTimer == null) 
             {
-                var seconds = 10;
+                var seconds = 60;
                 var conversionRatio = 1000;
                 oneHourTimer = new Timer(seconds * conversionRatio);
                 oneHourTimer.Elapsed += OneHourPassedEvent;
