@@ -1,0 +1,29 @@
+Pill taken events: 
+On topic:
+dipsgrp4/sensors/pillmonitor/rfidreader/fakeRfidReaderId
+Bodies:
+
+Pill glass put on reader
+{
+	"Tag": "fakeRfidReaderId",
+	"State": "Detected",
+	"Timestamp": "2022-04-25T10:09:52.6047686+02:00"
+}
+
+Pill glass removed from reader
+{
+	"Tag": "fakeRfidReaderId",
+	"State": "Lost",
+	"Timestamp": "2022-04-25T10:09:59.6047686+02:00"
+}
+
+Bed / Awake events:
+On topic: 
+dipsgrp4/sensors/bedmonitor/weightsensor/fakeWeightSensorId
+Bodies:
+
+Off bed::
+{"DeviceId":"408202","State":"Off Bed","Timestamp":"2022-04-25T08:18:05.5557803Z"}
+{"DeviceId":"408202","State":"Off Bed","Timestamp":"2022-04-25T09:22:03.9320494Z"}
+On bed::
+{"DeviceId":"408202","State":"On Bed","Timestamp":"2022-04-25T08:18:05.5557803Z"}

@@ -73,6 +73,20 @@ namespace ContextAwareness.Mqtt
             client.Subscribe(topic, qosLevel);
         }
 
+        public void Publish(string message, string topic)
+        {
+            if (!client.IsConnected)
+            {
+                Connect();
+            }
+            client.Publish(
+                topic,
+                Encoding.ASCII.GetBytes(message),
+                uPLibrary.Networking.M2Mqtt.Messages.MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE,
+                false
+                );
+        }
+
         //Might be a bug with the await n shit
         private async void Client_MqttMsgPublishReceived(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgPublishEventArgs e)
         {
@@ -83,18 +97,17 @@ namespace ContextAwareness.Mqtt
             {
                 var data = JsonSerializer.Deserialize<WeightSensor>(message);
                 await dbClient.CreateWeigtAsync(data);
-                dbClient.CreateDataEvent("weight");
+                dbClient.CreateDataEvent(data);
             } 
             else if(e.Topic.ToLower().Contains("pillmonitor"))
             {
                 var data = JsonSerializer.Deserialize<RFID>(message);
                 await dbClient.CreateRFIDAsync(data);
-                dbClient.CreateDataEvent("rfid");
+                dbClient.CreateDataEvent(data);
             }
             
-            
-            Console.WriteLine(e.Topic);
-            Console.WriteLine(e.Message);
+            //Console.WriteLine(e.Topic);
+            //Console.WriteLine(e.Message);
         }
 
         private void Client_MqttMsgUnsubscribed(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgUnsubscribedEventArgs e)

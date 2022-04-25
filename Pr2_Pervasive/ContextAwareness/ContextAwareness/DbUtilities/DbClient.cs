@@ -4,13 +4,15 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace ContextAwareness.DbUtilities
 {
     public class NewDataAvailableEventArgs : EventArgs
     {
-        public string Type { get; set; }
+        //public string Type { get; set; } 
+        public object data { get; set; }
 
     }
     public class DbClient
@@ -22,9 +24,13 @@ namespace ContextAwareness.DbUtilities
         private readonly string databaseName = "ContextAwareMetrics";
         private readonly string rfidCollectionName = "RFIDData";
         private readonly string weightCollectionName = "WeightSensorData";
+        private readonly string reminderCollectionName = "Reminders";
+        private readonly string pillTakenCollectionName = "PillTakenEvents";
 
         private readonly IMongoCollection<RFID> rfidCollection;
         private readonly IMongoCollection<WeightSensor> weightCollection;
+        private readonly IMongoCollection<Reminder> reminderCollection;
+        private readonly IMongoCollection<RFID> pillTakenCollection;
 
         public DbClient()
         {
@@ -36,6 +42,10 @@ namespace ContextAwareness.DbUtilities
 
             rfidCollection = database.GetCollection<RFID>(rfidCollectionName);
             weightCollection = database.GetCollection<WeightSensor>(weightCollectionName);
+            //database.CreateCollection(reminderCollectionName);
+            //database.CreateCollection(pillTakenCollectionName);
+            reminderCollection = database.GetCollection<Reminder>(reminderCollectionName);
+            pillTakenCollection= database.GetCollection<RFID>(pillTakenCollectionName);
         }
 
         public async Task CreateRFIDAsync(RFID newRFID) =>
@@ -44,12 +54,22 @@ namespace ContextAwareness.DbUtilities
         public async Task CreateWeigtAsync(WeightSensor newWeight) =>
             await weightCollection.InsertOneAsync(newWeight);
 
+        public async Task CreateReminderAsync(Reminder newReminder) =>
+            await reminderCollection.InsertOneAsync(newReminder);
 
+        public async Task<Reminder> FindReminderAsync(FilterDefinition<Reminder> filter) =>
+            await reminderCollection.Find(filter).FirstOrDefaultAsync();
 
-        public void CreateDataEvent(string type)
+        public async Task CreatePillTakenAsync(RFID newPillTakenEvent) =>
+            await pillTakenCollection.InsertOneAsync(newPillTakenEvent);
+
+        public async Task<RFID> FindPillTakenAsync(FilterDefinition<RFID> filter) =>
+            await pillTakenCollection.Find(filter).FirstOrDefaultAsync();
+
+        public void CreateDataEvent(object data)
         {
             NewDataAvailableEventArgs args = new NewDataAvailableEventArgs();
-            args.Type = type;
+            args.data = data;
             OnNewDataAvailable(args);
         }
 
@@ -62,6 +82,11 @@ namespace ContextAwareness.DbUtilities
             {
                 handler(this, e);
             }
+        }
+
+        public async void DeleteDatabase()
+        {
+            await client.DropDatabaseAsync(this.databaseName);
         }
     }
 }

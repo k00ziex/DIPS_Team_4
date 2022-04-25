@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using uPLibrary.Networking.M2Mqtt.Messages;
+using ContextAwareness.Handlers;
 
 namespace ContextAwareness
 {
@@ -29,21 +30,26 @@ namespace ContextAwareness
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            DbClient dbClient = new DbClient();
+            MqttClient mqttClient = new MqttClient(dbClient);
+            ContextAwareHandler contextAwareHandler = new ContextAwareHandler(dbClient, mqttClient);
 
-            services.AddSingleton<DbClient>();
-            services.AddSingleton<MqttClient>();
+            mqttClient.Connect();
+            mqttClient.SetupEvents();
+            mqttClient.Subscribe(new[] { "dipsgrp4/sensors/#" }, new[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+
+
+            services.AddSingleton(dbClient);
+            services.AddSingleton(mqttClient);
+            services.AddSingleton(contextAwareHandler);
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ContextAwareness", Version = "v1" });
             });
 
-            DbClient dbClient = new DbClient();
-            MqttClient mqttClient = new MqttClient(dbClient);
-
-            mqttClient.Connect();
-            mqttClient.SetupEvents();
-            mqttClient.Subscribe(new[] { "dipsgrp4/sensors/#" }, new[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
