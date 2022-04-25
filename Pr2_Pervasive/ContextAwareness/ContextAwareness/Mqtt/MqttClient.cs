@@ -106,7 +106,6 @@ namespace ContextAwareness.Mqtt
                 dbClient.CreateDataEvent(data);
             }
             
-            
             //Console.WriteLine(e.Topic);
             //Console.WriteLine(e.Message);
         }

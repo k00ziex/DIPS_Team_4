@@ -83,5 +83,10 @@ namespace ContextAwareness.DbUtilities
                 handler(this, e);
             }
         }
+
+        public async void DeleteDatabase()
+        {
+            await client.DropDatabaseAsync(this.databaseName);
+        }
     }
 }
