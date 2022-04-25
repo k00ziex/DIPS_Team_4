@@ -13,6 +13,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.JsonReader;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -20,6 +21,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.dipspillreminder.R;
+import com.example.dipspillreminder.models.PillReminder;
+import com.google.gson.Gson;
 import com.hivemq.client.mqtt.MqttClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 
@@ -34,10 +37,12 @@ public class NotificationServices extends Service {
     final String CHANNELID = "Foreground NotificationService ID";
     final String CHANNELNAME = "Foreground NotificationService NAME";
     final private String MQTTReminderTopic ="dipsgrp4/outputs/smartphone/commands/pillreminder";
-
+    private static Gson gson;
+    
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        gson = new Gson();
         createNotificationChannel();
 
         startMqttListener();
@@ -49,7 +54,7 @@ public class NotificationServices extends Service {
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         NotificationChannel mChannel = new NotificationChannel(CHANNELID, CHANNELNAME, NotificationManager.IMPORTANCE_HIGH);
-        Uri uri = Uri.parse("android.resource://"+getPackageName()+"/" + R.raw.defaultnotificationsound);
+        Uri uri = Uri.parse("android.resource://"+getPackageName()+"/" + R.raw.roblox);
 
         mChannel.enableLights(true);
         mChannel.setSound(uri, null);
@@ -91,8 +96,8 @@ public class NotificationServices extends Service {
                                 .callback(publish -> {
                                     // Process the received message
                                     String mes = new String(publish.getPayloadAsBytes(), StandardCharsets.UTF_8);
-                                    Log.d(TAG, String.format("Message Received %s", mes) );
-                                    createMqttNotification();
+                                    PillReminder pillReminder = gson.fromJson(mes, PillReminder.class);
+                                    createMqttNotification(pillReminder.Comment);
                                 })
                                 .send()
                                 .whenComplete((subAck, throwable) -> {
@@ -108,12 +113,12 @@ public class NotificationServices extends Service {
 
     }
 
-    private void createMqttNotification(){
+    private void createMqttNotification(String contentText){
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNELID)
                 .setSmallIcon(R.drawable.heart_svgrepo_com)
                 .setContentTitle("Medicine Warning")
                 .setAutoCancel(true)
-                .setContentText("Good Morning, Remember to take your medicine")
+                .setContentText(contentText)
                 .setPriority(NotificationCompat.PRIORITY_MAX);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(notificationId, builder.build());
