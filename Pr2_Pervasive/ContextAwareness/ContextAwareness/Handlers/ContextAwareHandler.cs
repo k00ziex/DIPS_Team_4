@@ -212,7 +212,7 @@ namespace ContextAwareness.Handlers
                 }
             };
             var savedEvent = dbClient.FindPillTakenAsync(filter).Result;
-            
+            if(savedEvent == null) return TimeSpan.Zero;
             return DateTime.Now.TimeOfDay - savedEvent.Timestamp.TimeOfDay;
         }
 
