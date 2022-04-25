@@ -22,7 +22,6 @@ namespace ContextAwareness.Handlers
         /// 2. Allowed to eat and drink latency is 20 seconds.
         /// </summary>
         private const bool DEMO_MODE_TIMING = true;
-        private TimeSpan allowedToDrinkAndEatLatency = new TimeSpan(0, 1, 0); // 1 hour
         /// <summary>
         /// Flag: Drops database on startup, use to "forget" that user has been reminded of pill, taken pill etc. 
         /// </summary>
@@ -31,6 +30,7 @@ namespace ContextAwareness.Handlers
         private readonly DbClient dbClient;
         private readonly MqttClient mqttClient;
         private Timer eatAndDrinkLatencyTimer;
+        private TimeSpan allowedToDrinkAndEatLatency = new TimeSpan(0, 1, 0); // 1 hour
 
 
 
