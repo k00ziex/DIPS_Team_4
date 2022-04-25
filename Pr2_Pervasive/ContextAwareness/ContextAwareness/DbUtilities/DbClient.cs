@@ -66,6 +66,9 @@ namespace ContextAwareness.DbUtilities
         public async Task<RFID> FindPillTakenAsync(FilterDefinition<RFID> filter) =>
             await pillTakenCollection.Find(filter).FirstOrDefaultAsync();
 
+        public async Task<List<RFID>> FindPillTakenInIntervalAsync(FilterDefinition<RFID> filter) =>
+            await pillTakenCollection.Find(filter).ToListAsync();
+
         public void CreateDataEvent(object data)
         {
             NewDataAvailableEventArgs args = new NewDataAvailableEventArgs();
