@@ -229,6 +229,7 @@ namespace ContextAwareness.Handlers
                 NotAllowedToEatOrDrinkToAllowedToEatOrDrinkTransition();
             }
             SendLightCommand("Off");
+            SendNotificationCommandToPhone("One hour has passed since you ate your pill, you can eat and drink again now");
             PrintState();
         }
 
@@ -321,6 +322,7 @@ namespace ContextAwareness.Handlers
             if (eatAndDrinkLatencyTimer == null)
             {
                 eatAndDrinkLatencyTimer = new Timer(allowedToDrinkAndEatLatency.TotalMilliseconds);
+                eatAndDrinkLatencyTimer.Elapsed += OneHourPassedEvent;
                 //if (DEMO_MODE)
                 //{
                 //    var seconds = 20;
@@ -336,7 +338,6 @@ namespace ContextAwareness.Handlers
                 //    oneHourTimer = new Timer(minutes * secondsInAMinute* toSecondsConversionRatio);
                 //    oneHourTimer.Elapsed += OneHourPassedEvent;
                 //}
-
             }
 
             eatAndDrinkLatencyTimer.AutoReset = false;
@@ -365,8 +366,13 @@ namespace ContextAwareness.Handlers
                 Timestamp = DateTime.UtcNow
             };
             var reminderModelToJson = JsonSerializer.Serialize(reminderModel);
-            mqttClient.Publish(reminderModelToJson, $"{pillReminderTopic}");
+            SendNotificationCommandToPhone(reminderModelToJson);
             await dbClient.CreateReminderAsync(reminderModel);
+        }
+
+        private void SendNotificationCommandToPhone(string message)
+        {
+            mqttClient.Publish(message, $"{pillReminderTopic}");
         }
 
         #endregion
