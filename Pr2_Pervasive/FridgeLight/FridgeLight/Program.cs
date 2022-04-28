@@ -6,7 +6,7 @@ namespace FridgeLight
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("----- Starting Fridge Light ------");
 
             var mqtt = new MqttClient();
             mqtt.Connect();

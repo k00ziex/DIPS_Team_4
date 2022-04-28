@@ -17,7 +17,7 @@ namespace FridgeLight
         public MqttClient()
         {
             ch = new DigitalOutput();
-            ch.Channel = 1;
+            ch.Channel = 0;
             ch.Open(Phidget.DefaultTimeout);
         }
 
@@ -38,9 +38,11 @@ namespace FridgeLight
                 switch (args.Topic)
                 {
                     case "dipsgrp4/outputs/light/commands/on":
+                        Console.WriteLine("+ Received an ON command.");
                         ch.DutyCycle = 1;
                         break;
                     case "dipsgrp4/outputs/light/commands/off":
+                        Console.WriteLine("- Received an OFF command.");
                         ch.DutyCycle = 0;
                         break;
                 }
