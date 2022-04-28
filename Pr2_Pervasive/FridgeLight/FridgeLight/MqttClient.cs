@@ -12,13 +12,13 @@ namespace FridgeLight
         private const string Password = "Dipsgrp4password";
         private const int Port = 8883;
         private uPLibrary.Networking.M2Mqtt.MqttClient _client;
-        private DigitalOutput ch;
+        private readonly DigitalOutput _ch;
 
         public MqttClient()
         {
-            ch = new DigitalOutput();
-            ch.Channel = 0;
-            ch.Open(Phidget.DefaultTimeout);
+            _ch = new DigitalOutput();
+            _ch.Channel = 1; // 0 turns on the green light, 1 turns on the red
+            _ch.Open(Phidget.DefaultTimeout);
         }
 
         public void Connect()
@@ -39,11 +39,11 @@ namespace FridgeLight
                 {
                     case "dipsgrp4/outputs/light/commands/on":
                         Console.WriteLine("+ Received an ON command.");
-                        ch.DutyCycle = 1;
+                        _ch.DutyCycle = 1;
                         break;
                     case "dipsgrp4/outputs/light/commands/off":
                         Console.WriteLine("- Received an OFF command.");
-                        ch.DutyCycle = 0;
+                        _ch.DutyCycle = 0;
                         break;
                 }
             };
@@ -57,7 +57,7 @@ namespace FridgeLight
 
         ~MqttClient()
         {
-            ch.Close();
+            _ch.Close();
         }
     }
 }
