@@ -96,8 +96,12 @@ public class NotificationServices extends Service {
                                 .callback(publish -> {
                                     // Process the received message
                                     String mes = new String(publish.getPayloadAsBytes(), StandardCharsets.UTF_8);
-                                    PillReminder pillReminder = gson.fromJson(mes, PillReminder.class);
-                                    createMqttNotification(pillReminder.Comment);
+                                    try{
+                                        PillReminder pillReminder = gson.fromJson(mes, PillReminder.class);
+                                        createMqttNotification(pillReminder.Comment);
+                                    }catch (Exception e){
+                                        Log.e(TAG, "UFFF HUGE ERROR IN MESSAGE");
+                                    }
                                 })
                                 .send()
                                 .whenComplete((subAck, throwable) -> {
@@ -119,7 +123,9 @@ public class NotificationServices extends Service {
                 .setContentTitle("Medicine Warning")
                 .setAutoCancel(true)
                 .setContentText(contentText)
-                .setPriority(NotificationCompat.PRIORITY_MAX);
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                .bigText(contentText));
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(notificationId, builder.build());
 
