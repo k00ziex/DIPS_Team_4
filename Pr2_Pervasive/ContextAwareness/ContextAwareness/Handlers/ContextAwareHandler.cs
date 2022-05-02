@@ -30,7 +30,7 @@ namespace ContextAwareness.Handlers
         private readonly DbClient dbClient;
         private readonly MqttClient mqttClient;
         private Timer eatAndDrinkLatencyTimer;
-        private TimeSpan allowedToDrinkAndEatLatency = new TimeSpan(0, 1, 0); // 1 hour
+        private TimeSpan allowedToDrinkAndEatLatency = new TimeSpan(1, 0, 0); // 1 hour
 
 
 
@@ -66,7 +66,7 @@ namespace ContextAwareness.Handlers
             if (DEMO_MODE_TIMING)
             {
                 wakeupTimeSlack = new TimeSpan(24, 0, 0); // All wakeup is within timespan
-                allowedToDrinkAndEatLatency = new TimeSpan(0, 0, 20);  // Override to 20 seconds
+                allowedToDrinkAndEatLatency = new TimeSpan(0, 0, 10);  // Override to 20 seconds
             }
             if (DEMO_MODE_CLEAR_DB_ON_STARTUP)
             {
@@ -224,12 +224,17 @@ namespace ContextAwareness.Handlers
 
         private void OneHourPassedEvent(object sender, EventArgs e)
         {
+            Console.WriteLine("Timer elapsed"); 
             if (currentState == State.Awake && currentSubState == SubState.NotAllowedToEatOrDrink)
             {
                 NotAllowedToEatOrDrinkToAllowedToEatOrDrinkTransition();
             }
             SendLightCommand("Off");
-            SendNotificationCommandToPhone("One hour has passed since you ate your pill, you can eat and drink again now");
+
+            var payload = new Reminder();
+            payload.Comment = "One hour has passed, you can eat and drink again now";
+            payload.Timestamp = DateTime.UtcNow;
+            SendNotificationCommandToPhone(JsonSerializer.Serialize(payload));
             PrintState();
         }
 
@@ -318,7 +323,7 @@ namespace ContextAwareness.Handlers
 
         private void InitAndStartEatAndDrinkLatencyTimer()
         {
-            Console.WriteLine("Timer elapsed");
+            Console.WriteLine("Timer started");
             if (eatAndDrinkLatencyTimer == null)
             {
                 eatAndDrinkLatencyTimer = new Timer(allowedToDrinkAndEatLatency.TotalMilliseconds);
