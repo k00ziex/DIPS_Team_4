@@ -22,7 +22,7 @@ namespace ContextAwareness.Controllers
             _dbClient = dbClient ?? throw new ArgumentNullException(nameof(dbClient));
         }
 
-        [HttpGet]
+        [HttpGet("HasTakenDailyPill")]
         public async Task<IActionResult> HasTakenDailyPillAsync()
         {
             var date = DateTime.Today;
@@ -36,9 +36,32 @@ namespace ContextAwareness.Controllers
             };
             var savedEvent = await _dbClient.FindPillTakenAsync(filter);
 
-            if (savedEvent != null) return Ok($"Yes! The pill was taken at: {savedEvent.Timestamp}");
+            if (savedEvent != null) return Ok($"Yes! The pill was taken at approximately {savedEvent.Timestamp} UTC");
 
             return Ok("No! The pill has not been taken today.");
+        }
+
+        [HttpGet("PillsTakenInInterval")]
+        public async Task<IActionResult> PillsTakenInInterval(DateTime from, DateTime to)
+        {
+            // Query for Timestamp greater than or equal to today
+            var filter = new BsonDocument
+            {
+                {
+                    "Timestamp", new BsonDocument{{"$gte", from}, {"$lte", to}}
+                }
+            };
+            var savedEvents = await _dbClient.FindPillTakenInIntervalAsync(filter);
+
+
+            if (savedEvents != null)
+            {
+                var listOfTagsAndTimestamps = 
+                    savedEvents.ToDictionary(savedEvent => savedEvent.Timestamp, savedEvent => savedEvent.Tag);
+                return Ok(listOfTagsAndTimestamps);
+            }
+
+            return Ok("No pills taken in the given interval.");
         }
     }
 }

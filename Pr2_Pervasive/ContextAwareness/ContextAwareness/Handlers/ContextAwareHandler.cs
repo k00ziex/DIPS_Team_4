@@ -25,7 +25,7 @@ namespace ContextAwareness.Handlers
         /// <summary>
         /// Flag: Drops database on startup, use to "forget" that user has been reminded of pill, taken pill etc. 
         /// </summary>
-        private const bool DEMO_MODE_CLEAR_DB_ON_STARTUP = true;
+        private const bool DEMO_MODE_CLEAR_DB_ON_STARTUP = false;
 
         private readonly DbClient dbClient;
         private readonly MqttClient mqttClient;
